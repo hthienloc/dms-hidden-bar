@@ -30,8 +30,11 @@ PluginComponent {
     property var _sizeCache: ({}) // Cache for widget sizes
     property bool anyHovered: false
     property bool isMouseInGlobalZone: false
+    
 
-    onIsMouseInGlobalZoneChanged: updateAnyHovered()
+    onIsMouseInGlobalZoneChanged: {
+        updateAnyHovered();
+    }
 
     function updateAnyHovered() {
         if (isMouseInGlobalZone) {
@@ -47,62 +50,6 @@ PluginComponent {
         }
     }
 
-    function checkGlobalMouse() {
-        if (!Quickshell.cursor || !Quickshell.cursor.pos) {
-            isMouseInGlobalZone = false;
-            return;
-        }
-
-        // Get pill global position
-        let globalPos = root.mapToItem(null, 0, 0);
-        let x = globalPos.x;
-        let y = globalPos.y;
-        let w = root.width;
-        let h = root.height;
-        
-        // expansion needs to be at least some value to allow triggering from empty space
-        let expansion = Math.max(root.hiddenAreaSize, 200);
-        
-        // Expand detection area based on section and orientation
-        if (root.isVertical) {
-            // In vertical bars, "right" section is actually the bottom, "left" is top
-            if (root.section === "right") { // Bottom-to-top
-                y -= expansion;
-                h += expansion;
-            } else if (root.section === "left") { // Top-to-bottom
-                h += expansion;
-            } else { // Center - expand both ways
-                y -= expansion / 2;
-                h += expansion;
-            }
-        } else {
-            if (root.section === "right") { // Right-to-left
-                x -= expansion;
-                w += expansion;
-            } else if (root.section === "left") { // Left-to-right
-                w += expansion;
-            } else { // Center - expand both ways
-                x -= expansion / 2;
-                w += expansion;
-            }
-        }
-        
-        // Use a generous margin to ensure stability
-        let margin = 40;
-        let mx = Quickshell.cursor.pos.x;
-        let my = Quickshell.cursor.pos.y;
-        
-        root.isMouseInGlobalZone = (mx >= x - margin && mx <= x + w + margin && 
-                                    my >= y - margin && my <= y + h + margin);
-    }
-
-    Timer {
-        id: globalMouseTimer
-        interval: 33 // ~30fps for smooth detection
-        repeat: true
-        running: true
-        onTriggered: checkGlobalMouse()
-    }
 
     Timer {
         id: hoverGraceTimer
@@ -216,7 +163,9 @@ PluginComponent {
     pillClickAction: function() {
         root.isExpanded = !root.isExpanded;
         updateWidgets();
-        if (root.isExpanded && root.autoCollapse) {
+        
+        // Only start collapse timer if expanded AND mouse is NOT in zone
+        if (root.isExpanded && root.autoCollapse && !root.anyHovered) {
             collapseTimer.restart();
         } else {
             collapseTimer.stop();
@@ -230,9 +179,8 @@ PluginComponent {
             if (!root.isExpanded) {
                 root.isExpanded = true;
                 updateWidgets();
-                if (root.autoCollapse) {
-                    collapseTimer.restart();
-                }
+                // We don't start collapseTimer here; handleHover will start it 
+                // when the mouse actually leaves the zone.
             }
         }
     }
@@ -242,7 +190,8 @@ PluginComponent {
         interval: root.collapseDelay
         repeat: false
         onTriggered: {
-            if (root.isExpanded) {
+            // Safety check: don't collapse if mouse returned to zone
+            if (root.isExpanded && !root.anyHovered) {
                 root.isExpanded = false;
                 updateWidgets();
             }
@@ -287,5 +236,43 @@ PluginComponent {
         interval: 100
         repeat: false
         onTriggered: updateWidgets()
+    }
+
+    MouseArea {
+        id: triggerZone
+        hoverEnabled: true
+        acceptedButtons: Qt.NoButton
+        propagateComposedEvents: true
+        cursorShape: Qt.PointingHandCursor
+        
+        readonly property real expansion: Math.max(root.hiddenAreaSize, 300)
+        
+        width: {
+            if (root.isVertical) return root.width;
+            return root.width + expansion;
+        }
+        height: {
+            if (!root.isVertical) return root.height;
+            return root.height + expansion;
+        }
+        
+        x: {
+            if (root.isVertical) return 0;
+            if (root.section === "right") return -expansion;
+            if (root.section === "center") return -expansion / 2;
+            return 0; // left section
+        }
+        y: {
+            if (!root.isVertical) return 0;
+            if (root.section === "right") return -expansion; // bottom-to-top
+            if (root.section === "center") return -expansion / 2;
+            return 0; // top-to-bottom
+        }
+        
+        onContainsMouseChanged: {
+            root.isMouseInGlobalZone = containsMouse;
+        }
+        
+        // Debug indicator removed for production
     }
 }
