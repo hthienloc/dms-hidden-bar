@@ -99,7 +99,8 @@ PluginComponent {
         
         let limit = (root.hideCount > 0) ? root.hideCount : candidates.length;
         let foundIds = [];
-        let maxSpan = 0;
+        let totalSize = 0;
+        
         for (let j = 0; j < candidates.length; j++) {
             let c = candidates[j];
             let shouldBeHidden = (j < limit);
@@ -108,21 +109,22 @@ PluginComponent {
                 c.widget.parent.visible = root.isExpanded;
                 foundIds.push(c.id);
                 
+                // Try to get the size. We use implicitSize because it might be available even when hidden.
                 let w = root.isVertical ? (c.widget.implicitHeight || c.widget.parent.parent.height) 
                                         : (c.widget.implicitWidth || c.widget.parent.parent.width);
-                
-                // Use distance + width of the furthest widget as the total span
-                // This automatically accounts for all gaps/spacings
-                let span = c.dist + w;
-                if (span > maxSpan) maxSpan = span;
+                if (w > 0) {
+                    totalSize += w;
+                }
             } else {
                 c.widget.parent.visible = true;
             }
         }
         
-        // Update hiddenAreaSize if we found a valid span. 
-        if (maxSpan > 0) {
-            let newSize = maxSpan + Theme.spacingM; // Add small buffer
+        // Update hiddenAreaSize if we found a valid size. 
+        // We only update if totalSize > 0 to avoid resetting to 0 when widgets are hidden.
+        if (totalSize > 0) {
+            let newSize = totalSize + Theme.spacingM;
+            // Use a small threshold to avoid constant updates if implicitWidth fluctuates slightly
             if (Math.abs(root.hiddenAreaSize - newSize) > 1) {
                 root.hiddenAreaSize = newSize;
             }
