@@ -23,6 +23,8 @@ PluginComponent {
     readonly property bool excludeClock: pluginData.excludeClock ?? true
     readonly property bool autoCollapse: pluginData.autoCollapse ?? true
     readonly property int collapseDelay: pluginData.collapseDelay ?? 1000
+
+    property bool isPinned: false
     readonly property bool extendedTrigger: pluginData.extendedTrigger ?? true
     readonly property int hideCount: pluginData.hideCount ?? 0
 
@@ -73,7 +75,7 @@ PluginComponent {
             collapseTimer.stop();
         } else {
             hoverTimer.stop();
-            if (root.isExpanded && root.autoCollapse) {
+            if (root.isExpanded && root.autoCollapse && !root.isPinned) {
                 collapseTimer.restart();
             }
         }
@@ -162,10 +164,11 @@ PluginComponent {
 
     pillClickAction: function() {
         root.isExpanded = !root.isExpanded;
+        root.isPinned = false;
         updateWidgets();
         
-        // Only start collapse timer if expanded AND mouse is NOT in zone
-        if (root.isExpanded && root.autoCollapse && !root.anyHovered) {
+        // Only start collapse timer if expanded AND mouse is NOT in zone AND not pinned
+        if (root.isExpanded && root.autoCollapse && !root.anyHovered && !root.isPinned) {
             collapseTimer.restart();
         } else {
             collapseTimer.stop();
@@ -215,9 +218,23 @@ PluginComponent {
                     return root.isExpanded ? "view-conceal-symbolic" : "view-visible-symbolic"
                 }
                 size: Theme.iconSizeSmall
-                color: Theme.surfaceText
+                color: root.isPinned ? Theme.dockBorder : Theme.surfaceText
                 opacity: root.isExpanded ? 1.0 : 0.6
                 Behavior on opacity { NumberAnimation { duration: 200 } }
+            }
+            
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.RightButton
+                onClicked: {
+                    if (mouse.button === Qt.RightButton) {
+                        if (root.isExpanded) {
+                            root.isPinned = !root.isPinned;
+                        } else {
+                            root.isPinned = false;
+                        }
+                    }
+                }
             }
         }
     }
