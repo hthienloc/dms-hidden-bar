@@ -61,6 +61,14 @@ PluginSettings {
                 defaultValue: true
             }
 
+            StyledText {
+                text: "Right-click the pill icon to pin/unpin the bar when expanded."
+                font.pixelSize: Theme.fontSizeSmall
+                color: Theme.surfaceTextDim
+                wrapMode: Text.WordWrap
+                width: parent.width
+            }
+
             SliderSetting {
                 label: "Collapse delay"
                 description: "Wait time (ms) before collapsing automatically."
