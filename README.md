@@ -8,7 +8,10 @@ A plugin for Dank Material Shell to manage bar widget visibility.
 
 - Click to toggle visibility of widgets.
 - Auto-expansion on hover (enabled by default).
+- **Extended Trigger Area**: Hover over the space previously occupied by hidden widgets to expand.
 - Optional automatic collapse after inactivity.
+- **Max hidden widgets**: Limit the number of widgets to hide.
+- **Initial state**: Choose whether to start expanded or minimized.
 - Settings to exclude System Tray and Clock from being hidden.
 
 ## Installation
@@ -32,9 +35,12 @@ ln -s /path/to/dms-hidden-bar ~/.config/DankMaterialShell/plugins/hidden-bar
 
 ### Interaction
 - **Auto-expand on hover**: Automatically show widgets when hovering over the icon.
+- **Extended Trigger Area**: Allow triggering expansion by hovering over the "empty" space where widgets are hidden.
 - **Hover delay**: Delay in milliseconds before expansion.
 - **Auto-collapse**: Hide widgets automatically after a period.
-- **Collapse delay**: Duration in milliseconds before hiding.
+- **Collapse delay**: Duration in milliseconds before hiding (supports 0ms).
+- **Max hidden widgets**: Specify a limit on how many widgets to hide (0 = all).
+- **Start expanded**: Determine the initial state when the plugin is loaded.
 
 ### Exclusions
 - **Keep System Tray**: Do not hide the system tray.

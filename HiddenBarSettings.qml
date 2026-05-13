@@ -58,18 +58,32 @@ PluginSettings {
                 label: "Auto-collapse"
                 description: "Automatically collapse the bar after a period of inactivity."
                 settingKey: "autoCollapse"
-                defaultValue: false
+                defaultValue: true
             }
 
             SliderSetting {
                 label: "Collapse delay"
                 description: "Wait time (ms) before collapsing automatically."
                 settingKey: "collapseDelay"
-                defaultValue: 5000
-                minimum: 1000
+                defaultValue: 1000
+                minimum: 0
                 maximum: 10000
                 unit: "ms"
-                enabled: root.pluginData.autoCollapse ?? false
+                enabled: root.pluginData.autoCollapse ?? true
+            }
+
+            ToggleSetting {
+                label: "Extended trigger area"
+                description: "Allow triggering expansion by hovering over the area where icons are hidden."
+                settingKey: "extendedTrigger"
+                defaultValue: true
+            }
+
+            ToggleSetting {
+                label: "Start expanded"
+                description: "Whether the bar should be expanded when the plugin starts."
+                settingKey: "startExpanded"
+                defaultValue: false
             }
         }
     }
@@ -106,6 +120,16 @@ PluginSettings {
                 description: "Never hide the clock widget."
                 settingKey: "excludeClock"
                 defaultValue: true
+            }
+
+            SliderSetting {
+                label: "Max hidden widgets"
+                description: "Limit the number of widgets to hide. Set to 0 to hide all."
+                settingKey: "hideCount"
+                defaultValue: 0
+                minimum: 0
+                maximum: 20
+                unit: ""
             }
         }
     }
