@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import Quickshell
+import Quickshell.Wayland
 import qs.Common
 import qs.Services
 import qs.Widgets
@@ -26,9 +27,93 @@ PluginComponent {
     readonly property int hideCount: pluginData.hideCount ?? 0
 
     property real hiddenAreaSize: 0
-    property bool isPillHovered: false
-    property bool isExtendedHovered: false
-    readonly property bool anyHovered: isPillHovered || isExtendedHovered
+    property var _sizeCache: ({}) // Cache for widget sizes
+    property bool anyHovered: false
+    property bool isMouseInGlobalZone: false
+
+    onIsMouseInGlobalZoneChanged: updateAnyHovered()
+
+    function updateAnyHovered() {
+        if (isMouseInGlobalZone) {
+            hoverGraceTimer.stop();
+            anyHovered = true;
+        } else {
+            // Use grace period when expanded to prevent flicker during layout shifts
+            if (root.isExpanded) {
+                if (!hoverGraceTimer.running) hoverGraceTimer.restart();
+            } else {
+                anyHovered = false;
+            }
+        }
+    }
+
+    function checkGlobalMouse() {
+        if (!Quickshell.cursor || !Quickshell.cursor.pos) {
+            isMouseInGlobalZone = false;
+            return;
+        }
+
+        // Get pill global position
+        let globalPos = root.mapToItem(null, 0, 0);
+        let x = globalPos.x;
+        let y = globalPos.y;
+        let w = root.width;
+        let h = root.height;
+        
+        // expansion needs to be at least some value to allow triggering from empty space
+        let expansion = Math.max(root.hiddenAreaSize, 200);
+        
+        // Expand detection area based on section and orientation
+        if (root.isVertical) {
+            // In vertical bars, "right" section is actually the bottom, "left" is top
+            if (root.section === "right") { // Bottom-to-top
+                y -= expansion;
+                h += expansion;
+            } else if (root.section === "left") { // Top-to-bottom
+                h += expansion;
+            } else { // Center - expand both ways
+                y -= expansion / 2;
+                h += expansion;
+            }
+        } else {
+            if (root.section === "right") { // Right-to-left
+                x -= expansion;
+                w += expansion;
+            } else if (root.section === "left") { // Left-to-right
+                w += expansion;
+            } else { // Center - expand both ways
+                x -= expansion / 2;
+                w += expansion;
+            }
+        }
+        
+        // Use a generous margin to ensure stability
+        let margin = 40;
+        let mx = Quickshell.cursor.pos.x;
+        let my = Quickshell.cursor.pos.y;
+        
+        root.isMouseInGlobalZone = (mx >= x - margin && mx <= x + w + margin && 
+                                    my >= y - margin && my <= y + h + margin);
+    }
+
+    Timer {
+        id: globalMouseTimer
+        interval: 33 // ~30fps for smooth detection
+        repeat: true
+        running: true
+        onTriggered: checkGlobalMouse()
+    }
+
+    Timer {
+        id: hoverGraceTimer
+        interval: 500
+        repeat: false
+        onTriggered: {
+            if (!root.isMouseInGlobalZone) {
+                root.anyHovered = false;
+            }
+        }
+    }
 
     onAnyHoveredChanged: handleHover(anyHovered)
 
@@ -36,11 +121,9 @@ PluginComponent {
         if (hovered) {
             if (root.autoExpand && !root.isExpanded) {
                 hoverTimer.interval = root.hoverDelay;
-                hoverTimer.start();
+                hoverTimer.restart();
             }
-            if (root.isExpanded && root.autoCollapse) {
-                collapseTimer.stop();
-            }
+            collapseTimer.stop();
         } else {
             hoverTimer.stop();
             if (root.isExpanded && root.autoCollapse) {
@@ -65,7 +148,6 @@ PluginComponent {
             let id = allIds[i];
             if (id === root.pluginId) continue;
             
-            // Exclusion logic
             if (root.excludeTray && (id === "systray" || id.includes("tray"))) continue;
             if (root.excludeClock && (id === "clock" || id === "time")) continue;
             
@@ -74,7 +156,6 @@ PluginComponent {
                 let widgetPos = root.isVertical ? widget.parent.parent.y : widget.parent.parent.x;
                 let shouldManage = false;
                 
-                // FLIPPED LOGIC: Hide widgets towards the center
                 if (mySection === "right") {
                     shouldManage = (widgetPos < myPos);
                 } else if (mySection === "left") {
@@ -94,7 +175,6 @@ PluginComponent {
             }
         }
         
-        // Sort by distance to pill (closest first)
         candidates.sort((a, b) => a.dist - b.dist);
         
         let limit = (root.hideCount > 0) ? root.hideCount : candidates.length;
@@ -109,22 +189,23 @@ PluginComponent {
                 c.widget.parent.visible = root.isExpanded;
                 foundIds.push(c.id);
                 
-                // Try to get the size. We use implicitSize because it might be available even when hidden.
-                let w = root.isVertical ? (c.widget.implicitHeight || c.widget.parent.parent.height) 
-                                        : (c.widget.implicitWidth || c.widget.parent.parent.width);
-                if (w > 0) {
-                    totalSize += w;
+                // Get size, using cache if current size is 0 (hidden)
+                let currentSize = root.isVertical ? (c.widget.implicitHeight || c.widget.parent.parent.height) 
+                                               : (c.widget.implicitWidth || c.widget.parent.parent.width);
+                
+                if (currentSize > 0) {
+                    root._sizeCache[c.id] = currentSize;
                 }
+                
+                let size = currentSize > 0 ? currentSize : (root._sizeCache[c.id] || 0);
+                if (size > 0) totalSize += size;
             } else {
                 c.widget.parent.visible = true;
             }
         }
         
-        // Update hiddenAreaSize if we found a valid size. 
-        // We only update if totalSize > 0 to avoid resetting to 0 when widgets are hidden.
         if (totalSize > 0) {
             let newSize = totalSize + Theme.spacingM;
-            // Use a small threshold to avoid constant updates if implicitWidth fluctuates slightly
             if (Math.abs(root.hiddenAreaSize - newSize) > 1) {
                 root.hiddenAreaSize = newSize;
             }
@@ -140,12 +221,6 @@ PluginComponent {
         } else {
             collapseTimer.stop();
         }
-    }
-
-    // Hover expand logic using HoverHandler
-    HoverHandler {
-        id: hoverHandler
-        onHoveredChanged: root.isPillHovered = hovered
     }
 
     Timer {
@@ -179,33 +254,6 @@ PluginComponent {
             implicitWidth: pillIcon.implicitWidth
             implicitHeight: 24
             
-            // Extended trigger area that covers where hidden icons were
-            Item {
-                id: extendedTriggerArea
-                // Keep visible even when expanded to prevent hover-loss loops
-                visible: root.extendedTrigger && root.hiddenAreaSize > 0
-                
-                width: root.isVertical ? parent.width : root.hiddenAreaSize
-                height: root.isVertical ? root.hiddenAreaSize : parent.height
-                
-                // Position based on section and orientation
-                anchors.right: !root.isVertical && root.section === "right" ? parent.left : undefined
-                anchors.left: !root.isVertical && root.section === "left" ? parent.right : undefined
-                anchors.bottom: root.isVertical && root.section === "right" ? parent.top : undefined
-                anchors.top: root.isVertical && root.section === "left" ? parent.bottom : undefined
-
-                HoverHandler {
-                    onHoveredChanged: root.isExtendedHovered = hovered
-                }
-                
-                // Debug visual (commented out)
-                /* Rectangle {
-                    anchors.fill: parent
-                    color: "red"
-                    opacity: 0.2
-                } */
-            }
-
             DankIcon {
                 id: pillIcon
                 anchors.centerIn: parent
@@ -236,7 +284,7 @@ PluginComponent {
     
     Timer {
         id: reEvalTimer
-        interval: 10
+        interval: 100
         repeat: false
         onTriggered: updateWidgets()
     }
