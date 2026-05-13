@@ -64,7 +64,6 @@ PluginSettings {
             StyledText {
                 text: "Right-click the pill icon to pin/unpin the bar when expanded."
                 font.pixelSize: Theme.fontSizeSmall
-                color: Theme.surfaceTextSecondary
                 wrapMode: Text.WordWrap
                 width: parent.width
             }
