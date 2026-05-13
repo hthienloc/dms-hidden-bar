@@ -245,7 +245,7 @@ PluginComponent {
         propagateComposedEvents: true
         cursorShape: Qt.PointingHandCursor
         
-        readonly property real expansion: Math.max(root.hiddenAreaSize, 300)
+        readonly property real expansion: Math.max(root.hiddenAreaSize, 200)
         
         width: {
             if (root.isVertical) return root.width;
