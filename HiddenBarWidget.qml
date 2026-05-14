@@ -206,12 +206,13 @@ PluginComponent {
 
     horizontalBarPill: Component {
         Item {
-            implicitWidth: pillIcon.implicitWidth
-            implicitHeight: 24
+            implicitWidth: Theme.iconSizeSmall
+            implicitHeight: Theme.iconSizeSmall
             
             DankIcon {
                 id: pillIcon
                 anchors.centerIn: parent
+                size: Theme.iconSizeSmall
                 name: {
                     if (root.isPinned) return "push_pin";
                     if (root.section === "right") {
@@ -221,7 +222,6 @@ PluginComponent {
                     }
                     return root.isExpanded ? "view-conceal-symbolic" : "view-visible-symbolic"
                 }
-                size: Theme.iconSizeSmall
                 color: Theme.surfaceText
                 opacity: root.isExpanded ? 1.0 : 0.6
                 Behavior on opacity { NumberAnimation { duration: 200 } }
@@ -229,16 +229,16 @@ PluginComponent {
             
             Rectangle {
                 id: pinIndicator
-                width: 6
-                height: 6
-                radius: 3
+                width: Theme.spacingXS
+                height: Theme.spacingXS
+                radius: width / 2
                 color: Theme.primary
                 visible: root.isPinned
                 anchors {
                     right: parent.right
-                    rightMargin: -2
+                    rightMargin: -Theme.spacingXS / 2
                     top: parent.top
-                    topMargin: 3
+                    topMargin: Theme.spacingXS / 2
                 }
             }
             
