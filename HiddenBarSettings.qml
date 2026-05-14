@@ -17,7 +17,6 @@ PluginSettings {
         color: Theme.surfaceText
     }
 
-    // --- Interaction Section ---
     StyledRect {
         width: parent.width
         height: interactionColumn.implicitHeight + Theme.spacingL * 2
@@ -95,7 +94,6 @@ PluginSettings {
         }
     }
 
-    // --- Exclusions Section ---
     StyledRect {
         width: parent.width
         height: exclusionColumn.implicitHeight + Theme.spacingL * 2

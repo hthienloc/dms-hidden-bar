@@ -39,7 +39,6 @@ PluginComponent {
             hoverGraceTimer.stop();
             anyHovered = true;
         } else {
-            // Use grace period when expanded to prevent flicker during layout shifts
             if (root.isExpanded) {
                 if (!hoverGraceTimer.running) hoverGraceTimer.restart();
             } else {
@@ -188,8 +187,6 @@ PluginComponent {
             if (!root.isExpanded) {
                 root.isExpanded = true;
                 updateWidgets();
-                // We don't start collapseTimer here; handleHover will start it 
-                // when the mouse actually leaves the zone.
             }
         }
     }
@@ -313,7 +310,5 @@ PluginComponent {
         onContainsMouseChanged: {
             root.isMouseInGlobalZone = containsMouse;
         }
-        
-        // Debug indicator removed for production
     }
 }
