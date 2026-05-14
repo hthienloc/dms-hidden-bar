@@ -229,7 +229,7 @@ PluginComponent {
                 width: 6
                 height: 6
                 radius: 3
-                color: Theme.accent
+                color: Theme.primary
                 visible: root.isPinned
                 anchors {
                     right: parent.right
