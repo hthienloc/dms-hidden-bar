@@ -1,7 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-import Quickshell
-import Quickshell.Wayland
 import qs.Common
 import qs.Services
 import qs.Widgets
@@ -14,8 +12,6 @@ PluginComponent {
     
     Component.onCompleted: reEvalTimer.restart()
 
-    // List of widget IDs that we are currently managing/hiding
-    property var managedWidgets: []
 
     readonly property bool autoExpand: pluginData.autoExpand ?? true
     readonly property int hoverDelay: pluginData.hoverDelay ?? 0
@@ -117,7 +113,6 @@ PluginComponent {
                     candidates.push({
                         id: id,
                         widget: widget,
-                        pos: widgetPos,
                         dist: Math.abs(widgetPos - myPos)
                     });
                 }
@@ -127,7 +122,6 @@ PluginComponent {
         candidates.sort((a, b) => a.dist - b.dist);
         
         let limit = (root.hideCount > 0) ? root.hideCount : candidates.length;
-        let foundIds = [];
         let totalSize = 0;
         
         for (let j = 0; j < candidates.length; j++) {
@@ -138,7 +132,6 @@ PluginComponent {
                 if (c.widget.parent) {
                     c.widget.parent.visible = root.isExpanded;
                 }
-                foundIds.push(c.id);
                 
                 // Get size, using cache if current size is 0 (hidden)
                 let currentSize = root.isVertical ? (c.widget.implicitHeight || (c.widget.parent && c.widget.parent.parent ? c.widget.parent.parent.height : 0)) 
@@ -173,7 +166,6 @@ PluginComponent {
         } else if (root.hiddenAreaSize !== 0) {
             root.hiddenAreaSize = 0;
         }
-        root.managedWidgets = foundIds;
     }
 
     pillClickAction: function() {
