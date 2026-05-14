@@ -7,7 +7,7 @@ Hide unused bar widgets and expand them on demand.
 ## Install
 
 ```
-dms://plugin/install/hidden-bar
+dms://plugin/install/hiddenBar
 ```
 
 Or manually:
