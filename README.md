@@ -6,7 +6,9 @@ Hide unused bar widgets and expand them on demand.
 
 ## Install
 
-[Install Now](dms://plugin/install/hidden-bar)
+```
+dms://plugin/install/hidden-bar
+```
 
 Or manually:
 ```bash
