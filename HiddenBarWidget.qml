@@ -135,12 +135,14 @@ PluginComponent {
             let shouldBeHidden = (j < limit);
             
             if (shouldBeHidden) {
-                c.widget.parent.visible = root.isExpanded;
+                if (c.widget.parent) {
+                    c.widget.parent.visible = root.isExpanded;
+                }
                 foundIds.push(c.id);
                 
                 // Get size, using cache if current size is 0 (hidden)
-                let currentSize = root.isVertical ? (c.widget.implicitHeight || c.widget.parent.parent.height) 
-                                               : (c.widget.implicitWidth || c.widget.parent.parent.width);
+                let currentSize = root.isVertical ? (c.widget.implicitHeight || (c.widget.parent && c.widget.parent.parent ? c.widget.parent.parent.height : 0)) 
+                                               : (c.widget.implicitWidth || (c.widget.parent && c.widget.parent.parent ? c.widget.parent.parent.width : 0));
                 
                 if (currentSize > 0) {
                     root._sizeCache[c.id] = currentSize;
@@ -149,7 +151,17 @@ PluginComponent {
                 let size = currentSize > 0 ? currentSize : (root._sizeCache[c.id] || 0);
                 if (size > 0) totalSize += size;
             } else {
-                c.widget.parent.visible = true;
+                if (c.widget.parent) {
+                    c.widget.parent.visible = true;
+                }
+            }
+        }
+        
+        // Cleanup cache for unregistered widgets
+        let cacheKeys = Object.keys(root._sizeCache);
+        for (let k = 0; k < cacheKeys.length; k++) {
+            if (allIds.indexOf(cacheKeys[k]) === -1) {
+                delete root._sizeCache[cacheKeys[k]];
             }
         }
         
@@ -158,6 +170,8 @@ PluginComponent {
             if (Math.abs(root.hiddenAreaSize - newSize) > 1) {
                 root.hiddenAreaSize = newSize;
             }
+        } else if (root.hiddenAreaSize !== 0) {
+            root.hiddenAreaSize = 0;
         }
         root.managedWidgets = foundIds;
     }
@@ -260,7 +274,9 @@ PluginComponent {
     Connections {
         target: BarWidgetService
         function onWidgetRegistered(id, screen) {
-            reEvalTimer.restart();
+            if (root.parentScreen && screen === root.parentScreen.name) {
+                reEvalTimer.restart();
+            }
         }
     }
     
