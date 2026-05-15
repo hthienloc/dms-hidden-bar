@@ -21,6 +21,9 @@ PluginComponent {
     readonly property int collapseDelay: pluginData.collapseDelay ?? 1000
 
     property bool isPinned: false
+    readonly property int expandedHeight: Theme.iconSizeLarge + Theme.spacingM
+    readonly property int collapsedHeight: 4
+    readonly property int spacing: Theme.spacingS
     readonly property bool extendedTrigger: pluginData.extendedTrigger ?? true
     readonly property int hideCount: pluginData.hideCount ?? 0
 
