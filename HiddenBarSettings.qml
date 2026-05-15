@@ -11,17 +11,14 @@ PluginSettings {
     pluginId: "hiddenBar"
 
     PluginHeader {
-        title: "Hidden Bar Settings"
-        description: "Organize and hide status bar icons to keep your workspace clean."
+        title: "Hidden Bar"
+        description: "This plugin helps keep your bar clean by hiding secondary widgets.
+• Hover the icon to expand.
+• Left-click to toggle permanently.
+• Right-click to PIN (prevents auto-collapse)."
     }
 
-    SettingsCard {
-        SectionTitle { text: "Quick Guide" }
-        
-        InfoText {
-            text: "• Hover the pill icon to expand the bar.\n• Right-click the pill icon to pin it permanently.\n• Click individual icons to use them as normal."
-        }
-    }
+
 
     SettingsCard {
         SectionTitle { text: "Interaction" }
