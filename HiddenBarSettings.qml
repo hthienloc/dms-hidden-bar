@@ -12,10 +12,7 @@ PluginSettings {
 
     PluginHeader {
         title: "Hidden Bar"
-        description: "This plugin helps keep your bar clean by hiding secondary widgets.
-• Hover the icon to expand.
-• Left-click to toggle permanently.
-• Right-click to PIN (prevents auto-collapse)."
+        description: "Organize your bar by hiding secondary widgets behind a sleek expansion zone."
     }
 
     SettingsCard {
@@ -23,7 +20,7 @@ PluginSettings {
         InfoText {
             text: "• <b>Hover</b> the icon to temporarily expand the hidden area.
 • <b>Left-click</b> to toggle expanded state permanently.
-• <b>Right-click</b> to PIN (prevent auto-collapse) when expanded."
+• <b>Right-click</b> to <b>PIN</b> (prevent auto-collapse) when expanded."
         }
     }
 
