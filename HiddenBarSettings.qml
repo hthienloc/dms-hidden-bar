@@ -17,10 +17,12 @@ PluginSettings {
 
     SettingsCard {
         SectionTitle { text: "Usage Guide" }
-        InfoText {
-            text: "• <b>Hover</b> the icon to temporarily expand the hidden area.
-• <b>Left-click</b> to toggle expanded state permanently.
-• <b>Right-click</b> to <b>PIN</b> (prevent auto-collapse) when expanded."
+        UsageGuide {
+            items: [
+                "<b>Hover</b> the icon to temporarily expand the hidden area.",
+                "<b>Left-click</b> to toggle expanded state permanently.",
+                "<b>Right-click</b> to <b>PIN</b> (prevent auto-collapse) when expanded."
+            ]
         }
     }
 
