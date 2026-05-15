@@ -12,6 +12,15 @@ PluginSettings {
 
     PluginHeader {
         title: "Hidden Bar Settings"
+        description: "Organize and hide status bar icons to keep your workspace clean."
+    }
+
+    SettingsCard {
+        SectionTitle { text: "Quick Guide" }
+        
+        InfoText {
+            text: "• Hover the pill icon to expand the bar.\n• Right-click the pill icon to pin it permanently.\n• Click individual icons to use them as normal."
+        }
     }
 
     SettingsCard {
@@ -64,10 +73,6 @@ PluginSettings {
             description: "Whether the bar should be expanded when the plugin starts."
             settingKey: "startExpanded"
             defaultValue: false
-        }
-        
-        InfoText {
-            text: "Tip: Right-click the pill icon to pin/unpin the bar when expanded."
         }
     }
 
