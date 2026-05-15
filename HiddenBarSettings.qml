@@ -24,7 +24,6 @@ PluginSettings {
         }
     }
 
-
     SettingsCard {
         SectionTitle { text: "Interaction" }
 
