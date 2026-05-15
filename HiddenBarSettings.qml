@@ -20,7 +20,7 @@ PluginSettings {
         UsageGuide {
             items: [
                 "<b>Hover</b> the icon to temporarily expand the hidden area.",
-                "<b>Left-click</b> to toggle expanded state permanently.",
+                "<b>Left-click</b> to toggle expanded state manually.",
                 "<b>Right-click</b> to <b>PIN</b> (prevent auto-collapse) when expanded."
             ]
         }
@@ -104,6 +104,17 @@ PluginSettings {
             minimum: 0
             maximum: 20
             unit: ""
+        }
+    }
+
+    SettingsCard {
+        SectionTitle { text: "Behavior" }
+
+        ToggleSetting {
+            settingKey: "showHints"
+            label: "Show Hints"
+            description: "Display helpful usage tips and shortcuts at the bottom of the popout."
+            defaultValue: true
         }
     }
 }
