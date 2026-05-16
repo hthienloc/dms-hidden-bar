@@ -64,6 +64,16 @@ PluginSettings {
             enabled: root.pluginData.autoCollapse ?? true
         }
 
+        SliderSetting {
+            label: "Trigger area adjustment"
+            description: "Fine-tune the trigger zone size. Positive values expand it, negative values shrink it."
+            settingKey: "triggerAdjustment"
+            defaultValue: 0
+            minimum: -150
+            maximum: 500
+            unit: "px"
+        }
+
         ToggleSetting {
             label: "Extended trigger area"
             description: "Allow triggering expansion by hovering over the area where icons are hidden."

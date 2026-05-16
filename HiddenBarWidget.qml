@@ -27,6 +27,7 @@ PluginComponent {
     readonly property bool extendedTrigger: pluginData.extendedTrigger ?? true
     readonly property int hideCount: pluginData.hideCount ?? 0
     readonly property bool showRegionPreview: pluginData.showRegionPreview ?? false
+    readonly property int triggerAdjustment: pluginData.triggerAdjustment ?? 0
 
     property real hiddenAreaSize: 0
     property var _sizeCache: ({}) // Cache for widget sizes
@@ -287,7 +288,8 @@ PluginComponent {
         propagateComposedEvents: true
         cursorShape: Qt.PointingHandCursor
         
-        readonly property real expansion: (root.extendedTrigger || root.isExpanded) ? Math.max(root.hiddenAreaSize, 200) : 0
+        readonly property real baseExpansion: (root.extendedTrigger || root.isExpanded) ? Math.max(root.hiddenAreaSize, 200) : 0
+        readonly property real expansion: Math.max(0, baseExpansion + root.triggerAdjustment)
         
         width: {
             if (root.isVertical) return root.width;
