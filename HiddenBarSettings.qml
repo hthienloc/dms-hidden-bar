@@ -73,7 +73,7 @@ PluginSettings {
 
         ToggleSetting {
             label: "Show region preview"
-            description: "Highlight the expansion trigger zone for easier configuration. Turn this off after setup."
+            description: "Highlight the expansion trigger zone"
             settingKey: "showRegionPreview"
             defaultValue: false
         }
