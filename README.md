@@ -41,7 +41,8 @@ git clone https://github.com/hthienloc/dms-hidden-bar ~/.config/DankMaterialShel
 GPL-3.0
 
 ## Roadmap / TODO
-- [ ] **Manual Widget Selection**: Add a checklist in settings to explicitly include or exclude specific widgets regardless of their position.
-- [ ] **Transition Animations**: Implement customizable animation presets (Fade, Scale, or Slide) for a more polished reveal effect.
-- [ ] **Global Shortcut**: Add support for a keyboard shortcut to toggle the expanded state globally.
-- [ ] **Dynamic Priority**: Automatically hide widgets based on available screen space or active window constraints.
+- [ ] **Granular Widget Control:** Settings interface to manually whitelist/blacklist specific widgets for hiding.
+- [ ] **Smooth Animations:** Integrated transition effects (Slide, Fade, or Bounce) when expanding/collapsing the hidden area.
+- [ ] **Global Keybinding:** Support for a user-defined hotkey to trigger expansion without using the mouse.
+- [ ] **Space-Aware Auto-Hiding:** Automatically hide more widgets as the screen resolution decreases or bar congestion increases.
+- [ ] **Stylized Indicators:** Multiple icon sets and customizable colors for the expansion trigger to match custom themes.
