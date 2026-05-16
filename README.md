@@ -39,3 +39,9 @@ git clone https://github.com/hthienloc/dms-hidden-bar ~/.config/DankMaterialShel
 ## License
 
 GPL-3.0
+
+## Roadmap / TODO
+- [ ] **Manual Widget Selection**: Add a checklist in settings to explicitly include or exclude specific widgets regardless of their position.
+- [ ] **Transition Animations**: Implement customizable animation presets (Fade, Scale, or Slide) for a more polished reveal effect.
+- [ ] **Global Shortcut**: Add support for a keyboard shortcut to toggle the expanded state globally.
+- [ ] **Dynamic Priority**: Automatically hide widgets based on available screen space or active window constraints.
