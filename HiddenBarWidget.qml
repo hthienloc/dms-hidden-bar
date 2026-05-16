@@ -26,6 +26,7 @@ PluginComponent {
     readonly property int spacing: Theme.spacingS
     readonly property bool extendedTrigger: pluginData.extendedTrigger ?? true
     readonly property int hideCount: pluginData.hideCount ?? 0
+    readonly property bool showRegionPreview: pluginData.showRegionPreview ?? false
 
     property real hiddenAreaSize: 0
     property var _sizeCache: ({}) // Cache for widget sizes
@@ -313,5 +314,19 @@ PluginComponent {
         onContainsMouseChanged: {
             root.isMouseInGlobalZone = containsMouse;
         }
+    }
+
+    Rectangle {
+        id: regionPreview
+        visible: root.showRegionPreview
+        x: triggerZone.x
+        y: triggerZone.y
+        width: triggerZone.width
+        height: triggerZone.height
+        color: Theme.primary
+        opacity: 0.2
+        border.color: Theme.primary
+        border.width: 1
+        z: 999 // Ensure it's visible over other widgets
     }
 }

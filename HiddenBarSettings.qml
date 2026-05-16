@@ -106,4 +106,15 @@ PluginSettings {
             unit: ""
         }
     }
+
+    SettingsCard {
+        SectionTitle { text: "Diagnostics" }
+
+        ToggleSetting {
+            label: "Show region preview"
+            description: "Highlight the expansion trigger zone for easier configuration. Turn this off after setup."
+            settingKey: "showRegionPreview"
+            defaultValue: false
+        }
+    }
 }
