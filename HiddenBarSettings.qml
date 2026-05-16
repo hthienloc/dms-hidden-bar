@@ -27,7 +27,7 @@ PluginSettings {
     }
 
     SettingsCard {
-        SectionTitle { text: "Interaction" }
+        SectionTitle { text: "Expansion & Collapse" }
 
         ToggleSetting {
             label: "Start expanded"
@@ -70,6 +70,17 @@ PluginSettings {
             unit: "ms"
             enabled: root.pluginData.autoCollapse ?? true
         }
+    }
+
+    SettingsCard {
+        SectionTitle { text: "Trigger Zone" }
+
+        ToggleSetting {
+            label: "Extended trigger area"
+            description: "Allow triggering expansion by hovering over the area where icons are hidden."
+            settingKey: "extendedTrigger"
+            defaultValue: true
+        }
 
         ToggleSetting {
             label: "Show region preview"
@@ -86,13 +97,6 @@ PluginSettings {
             minimum: -150
             maximum: 500
             unit: "px"
-        }
-
-        ToggleSetting {
-            label: "Extended trigger area"
-            description: "Allow triggering expansion by hovering over the area where icons are hidden."
-            settingKey: "extendedTrigger"
-            defaultValue: true
         }
     }
 
