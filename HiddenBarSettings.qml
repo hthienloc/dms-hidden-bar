@@ -30,6 +30,13 @@ PluginSettings {
         SectionTitle { text: "Interaction" }
 
         ToggleSetting {
+            label: "Start expanded"
+            description: "Whether the bar should be expanded when the plugin starts."
+            settingKey: "startExpanded"
+            defaultValue: false
+        }
+
+        ToggleSetting {
             label: "Auto-expand on hover"
             description: "Expand the bar automatically when hovering over the icon."
             settingKey: "autoExpand"
@@ -64,6 +71,13 @@ PluginSettings {
             enabled: root.pluginData.autoCollapse ?? true
         }
 
+        ToggleSetting {
+            label: "Show region preview"
+            description: "Highlight the expansion trigger zone for easier configuration. Turn this off after setup."
+            settingKey: "showRegionPreview"
+            defaultValue: false
+        }
+
         SliderSetting {
             label: "Trigger area adjustment"
             description: "Fine-tune the trigger zone size. Positive values expand it, negative values shrink it."
@@ -79,13 +93,6 @@ PluginSettings {
             description: "Allow triggering expansion by hovering over the area where icons are hidden."
             settingKey: "extendedTrigger"
             defaultValue: true
-        }
-
-        ToggleSetting {
-            label: "Start expanded"
-            description: "Whether the bar should be expanded when the plugin starts."
-            settingKey: "startExpanded"
-            defaultValue: false
         }
     }
 
@@ -114,17 +121,6 @@ PluginSettings {
             minimum: 0
             maximum: 20
             unit: ""
-        }
-    }
-
-    SettingsCard {
-        SectionTitle { text: "Diagnostics" }
-
-        ToggleSetting {
-            label: "Show region preview"
-            description: "Highlight the expansion trigger zone for easier configuration. Turn this off after setup."
-            settingKey: "showRegionPreview"
-            defaultValue: false
         }
     }
 }
