@@ -14,7 +14,7 @@ Hide unused bar widgets and expand them on demand.
 git clone https://github.com/hthienloc/dms-common ~/.config/DankMaterialShell/plugins/dms-common
 
 # 2. Install this plugin
-dms://plugin/install/hiddenBar
+dms plugins install hiddenBar
 ```
 
 Or manually:
