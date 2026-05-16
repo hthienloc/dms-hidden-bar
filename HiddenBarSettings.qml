@@ -68,7 +68,7 @@ PluginSettings {
             minimum: 0
             maximum: 10000
             unit: "ms"
-            enabled: root.pluginData.autoCollapse ?? true
+            enabled: (root.pluginData?.autoCollapse) ?? true
         }
     }
 
