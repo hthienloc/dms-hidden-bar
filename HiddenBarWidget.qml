@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import Quickshell
 import qs.Common
 import qs.Modules.Plugins
 import qs.Services
@@ -218,6 +219,56 @@ PluginComponent {
         onTriggered: updateWidgets()
     }
 
+    IpcHandler {
+        function toggle() : string {
+            root.isExpanded = !root.isExpanded;
+            root.isPinned = false;
+            updateWidgets();
+            if (root.isExpanded && root.autoCollapse && !root.anyHovered && !root.isPinned)
+                collapseTimer.restart();
+            else
+                collapseTimer.stop();
+            return root.isExpanded ? "EXPANDED" : "COLLAPSED";
+        }
+
+        function expand() : string {
+            if (!root.isExpanded) {
+                root.isExpanded = true;
+                updateWidgets();
+            }
+            return "EXPANDED";
+        }
+
+        function collapse() : string {
+            if (root.isExpanded) {
+                root.isExpanded = false;
+                root.isPinned = false;
+                updateWidgets();
+            }
+            return "COLLAPSED";
+        }
+
+        function pin() : string {
+            if (!root.isExpanded) {
+                root.isExpanded = true;
+                updateWidgets();
+            }
+            root.isPinned = true;
+            collapseTimer.stop();
+            return "PINNED";
+        }
+
+        function unpin() : string {
+            root.isPinned = false;
+            if (root.isExpanded && root.autoCollapse && !root.anyHovered)
+                collapseTimer.restart();
+
+            return "UNPINNED";
+        }
+
+        target: "hiddenBar"
+    }
+
     MouseArea {
         id: triggerZone
 
@@ -258,7 +309,8 @@ PluginComponent {
 
             if (root.section === "right")
                 return -expansion;
- // bottom-to-top
+
+            // bottom-to-top
             if (root.section === "center")
                 return -expansion / 2;
 

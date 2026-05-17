@@ -36,6 +36,32 @@ git clone https://github.com/hthienloc/dms-hidden-bar ~/.config/DankMaterialShel
 | Left click | Toggle expand |
 | Right click | Pin/unpin expanded state |
 
+## IPC Commands
+
+Use `dms ipc call hiddenBar <command>` to control the bar from scripts or keybindings.
+
+| Command | Description |
+|---------|-------------|
+| `toggle` | Toggle expand/collapse |
+| `expand` | Expand the hidden area |
+| `collapse` | Collapse the hidden area |
+| `pin` | Expand and lock open (disable auto-collapse) |
+| `unpin` | Unlock and resume auto-collapse |
+
+### Keybinding examples
+
+**Niri:**
+```kdl
+bindings {
+    Mod+Backslash { spawn "dms" "ipc" "call" "hiddenBar" "toggle"; }
+}
+```
+
+**Hyprland:**
+```ini
+bind = SUPER, backslash, exec, dms ipc call hiddenBar toggle
+```
+
 ## License
 
 GPL-3.0
@@ -43,6 +69,6 @@ GPL-3.0
 ## Roadmap / TODO
 - [ ] **Granular Widget Control:** Settings interface to manually whitelist/blacklist specific widgets for hiding.
 - [ ] **Smooth Animations:** Integrated transition effects (Slide, Fade, or Bounce) when expanding/collapsing the hidden area.
-- [ ] **Global Keybinding:** Support for a user-defined hotkey to trigger expansion without using the mouse.
+- [x] **Global Keybinding:** IPC commands (`toggle`, `expand`, `collapse`, `pin`, `unpin`) for use with any compositor keybinding system.
 - [ ] **Space-Aware Auto-Hiding:** Automatically hide more widgets as the screen resolution decreases or bar congestion increases.
 - [ ] **Stylized Indicators:** Multiple icon sets and customizable colors for the expansion trigger to match custom themes.
