@@ -2,7 +2,7 @@
   "id": "hiddenBar",
   "name": "Hidden Bar",
   "description": "Hide and expand bar widgets with hover and click support.",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "author": "Loc Huynh",
   "icon": "unfold_more",
   "type": "widget",
