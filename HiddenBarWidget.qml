@@ -94,10 +94,10 @@ PluginComponent {
                     shouldManage = true;
                 if (shouldManage)
                     candidates.push({
-                        "id": id,
-                        "widget": widget,
-                        "dist": Math.abs(widgetPos - myPos)
-                    });
+                    "id": id,
+                    "widget": widget,
+                    "dist": Math.abs(widgetPos - myPos)
+                });
 
             }
         }
@@ -229,18 +229,27 @@ PluginComponent {
         propagateComposedEvents: true
         cursorShape: Qt.PointingHandCursor
         width: {
+            if (!root.extendedTrigger)
+                return Theme.iconSizeSmall;
+
             if (root.isVertical)
                 return root.width;
 
             return root.width + expansion;
         }
         height: {
+            if (!root.extendedTrigger)
+                return Theme.iconSizeSmall;
+
             if (!root.isVertical)
                 return root.height;
 
             return root.height + expansion;
         }
         x: {
+            if (!root.extendedTrigger)
+                return (root.width - Theme.iconSizeSmall) / 2;
+
             if (root.isVertical)
                 return 0;
 
@@ -253,12 +262,16 @@ PluginComponent {
             return 0; // left section
         }
         y: {
+            if (!root.extendedTrigger)
+                return (root.height - Theme.iconSizeSmall) / 2;
+
             if (!root.isVertical)
                 return 0;
 
             if (root.section === "right")
                 return -expansion;
- // bottom-to-top
+
+            // bottom-to-top
             if (root.section === "center")
                 return -expansion / 2;
 
