@@ -320,6 +320,16 @@ PluginComponent {
         onContainsMouseChanged: {
             root.isMouseInGlobalZone = containsMouse;
         }
+
+        DropArea {
+            anchors.fill: parent
+            onEntered: {
+                root.isMouseInGlobalZone = true;
+            }
+            onExited: {
+                root.isMouseInGlobalZone = false;
+            }
+        }
     }
 
     Rectangle {
