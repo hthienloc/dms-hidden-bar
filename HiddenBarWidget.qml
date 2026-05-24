@@ -323,6 +323,7 @@ PluginComponent {
 
         DropArea {
             anchors.fill: parent
+            enabled: !root.isExpanded
             onEntered: {
                 root.isMouseInGlobalZone = true;
             }
