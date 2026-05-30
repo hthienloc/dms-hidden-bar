@@ -1,4 +1,5 @@
 module dms.common
+NoteCard 1.0 NoteCard.qml
 PluginAbout 1.0 PluginAbout.qml
 SectionTitle 1.0 SectionTitle.qml
 SettingsCard 1.0 SettingsCard.qml
