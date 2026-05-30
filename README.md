@@ -30,10 +30,8 @@ git clone https://github.com/hthienloc/dms-hidden-bar ~/.config/DankMaterialShel
 | Left click | Toggle expand |
 | Right click | Pin/unpin expanded state |
 
-> [!IMPORTANT]
-> **Lưu ý / Note:** 
-> - **VI:** Khi mới thêm widget này hoặc thêm các widget khác vào thanh trạng thái (vùng ẩn), bạn cần khởi động lại DankMaterialShell (`dms restart` hoặc tải lại cấu hình) để plugin có thể nhận dạng và quản lý chính xác các widget mới.
-> - **EN:** When newly adding this widget or adding other widgets to the status bar (hidden area), you need to restart DankMaterialShell (`dms restart` or reload session) for the plugin to recognize and manage the new widgets.
+> [!NOTE]
+> When newly adding this widget or adding other widgets to the status bar (hidden area), you need to restart DankMaterialShell (`dms restart` or reload session) for the plugin to recognize and manage the new widgets.
 
 ## IPC Commands
 
