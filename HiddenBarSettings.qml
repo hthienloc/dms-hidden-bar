@@ -10,17 +10,6 @@ PluginSettings {
     id: root
     pluginId: "hiddenBar"
 
-    SettingsCard {
-        SectionTitle { text: I18n.tr("Usage Guide"); icon: "help" }
-        UsageGuide {
-            items: [
-                I18n.tr("<b>Hover</b> the icon to temporarily expand the hidden area."),
-                I18n.tr("<b>Left-click</b> to toggle expanded state manually."),
-                I18n.tr("<b>Right-click</b> to <b>PIN</b> (prevent auto-collapse) when expanded.")
-            ]
-        }
-    }
-
     NoteCard {
         title: I18n.tr("Note")
         icon: "warning"
@@ -28,69 +17,112 @@ PluginSettings {
     }
 
     SettingsCard {
-        SectionTitle { text: I18n.tr("Expansion & Collapse"); icon: "unfold_more" }
+        id: expansionSection
+        SectionTitle { 
+            text: I18n.tr("Expansion & Collapse")
+            icon: "unfold_more" 
+            showReset: startExpanded.isDirty || autoExpand.isDirty || hoverDelay.isDirty || autoCollapse.isDirty || collapseDelay.isDirty
+            onResetClicked: {
+                startExpanded.resetToDefault();
+                autoExpand.resetToDefault();
+                hoverDelay.resetToDefault();
+                autoCollapse.resetToDefault();
+                collapseDelay.resetToDefault();
+            }
+        }
 
-        ToggleSetting {
+        ToggleSettingPlus {
+            id: startExpanded
             label: I18n.tr("Start expanded")
-            description: I18n.tr("Whether the bar should be expanded when the plugin starts.")
             settingKey: "startExpanded"
             defaultValue: false
         }
 
-        ToggleSetting {
+        Separator {}
+
+        ToggleSettingPlus {
+            id: autoExpand
             label: I18n.tr("Auto-expand on hover")
-            description: I18n.tr("Expand the bar automatically when hovering over the icon.")
             settingKey: "autoExpand"
             defaultValue: true
         }
 
-        SliderSetting {
+        Separator {}
+
+        SliderSettingPlus {
+            id: hoverDelay
             label: I18n.tr("Hover delay")
-            description: I18n.tr("Wait time (ms) before expanding on hover.")
+            description: I18n.tr("Wait time before expanding on hover.")
             settingKey: "hoverDelay"
             defaultValue: 0
             minimum: 0
             maximum: 1000
             unit: "ms"
+            leftLabel: "0"
+            rightLabel: "1000"
         }
 
-        ToggleSetting {
+        Separator {}
+
+        ToggleSettingPlus {
+            id: autoCollapse
             label: I18n.tr("Auto-collapse")
-            description: I18n.tr("Automatically collapse the bar after a period of inactivity.")
             settingKey: "autoCollapse"
             defaultValue: true
         }
 
-        SliderSetting {
+        Separator {}
+
+        SliderSettingPlus {
+            id: collapseDelay
             label: I18n.tr("Collapse delay")
-            description: I18n.tr("Wait time (ms) before collapsing automatically.")
+            description: I18n.tr("Wait time before collapsing automatically.")
             settingKey: "collapseDelay"
             defaultValue: 1000
             minimum: 0
             maximum: 10000
             unit: "ms"
-            enabled: (root.pluginData?.autoCollapse) ?? true
+            leftLabel: "0"
+            rightLabel: "10000"
+            enabled: autoCollapse.value
         }
     }
 
     SettingsCard {
-        SectionTitle { text: I18n.tr("Trigger Zone"); icon: "ads_click" }
+        id: triggerSection
+        SectionTitle { 
+            text: I18n.tr("Trigger Zone")
+            icon: "ads_click" 
+            showReset: extendedTrigger.isDirty || showRegionPreview.isDirty || triggerAdjustment.isDirty
+            onResetClicked: {
+                extendedTrigger.resetToDefault();
+                showRegionPreview.resetToDefault();
+                triggerAdjustment.resetToDefault();
+            }
+        }
 
-        ToggleSetting {
+        ToggleSettingPlus {
+            id: extendedTrigger
             label: I18n.tr("Extended trigger area")
             description: I18n.tr("Allow triggering expansion by hovering over the area where icons are hidden.")
             settingKey: "extendedTrigger"
             defaultValue: true
         }
 
-        ToggleSetting {
+        Separator {}
+
+        ToggleSettingPlus {
+            id: showRegionPreview
             label: I18n.tr("Show region preview")
-            description: I18n.tr("Highlight the expansion trigger zone")
+            description: I18n.tr("Highlight the expansion trigger zone.")
             settingKey: "showRegionPreview"
             defaultValue: false
         }
 
-        SliderSetting {
+        Separator {}
+
+        SliderSettingPlus {
+            id: triggerAdjustment
             label: I18n.tr("Trigger area adjustment")
             description: I18n.tr("Fine-tune the trigger zone size. Positive values expand it, negative values shrink it.")
             settingKey: "triggerAdjustment"
@@ -98,34 +130,73 @@ PluginSettings {
             minimum: -150
             maximum: 500
             unit: "px"
+            leftLabel: "-150"
+            rightLabel: "500"
         }
     }
 
     SettingsCard {
-        SectionTitle { text: I18n.tr("Exclusions"); icon: "block" }
+        id: exclusionsSection
+        SectionTitle { 
+            text: I18n.tr("Exclusions")
+            icon: "block" 
+            showReset: excludeTray.isDirty || excludeClock.isDirty || hideCount.isDirty
+            onResetClicked: {
+                excludeTray.resetToDefault();
+                excludeClock.resetToDefault();
+                hideCount.resetToDefault();
+            }
+        }
 
-        ToggleSetting {
+        ToggleSettingPlus {
+            id: excludeTray
             label: I18n.tr("Keep System Tray")
             description: I18n.tr("Never hide the system tray widgets.")
             settingKey: "excludeTray"
             defaultValue: true
         }
 
-        ToggleSetting {
+        Separator {}
+
+        ToggleSettingPlus {
+            id: excludeClock
             label: I18n.tr("Keep Clock")
             description: I18n.tr("Never hide the clock widget.")
             settingKey: "excludeClock"
             defaultValue: true
         }
 
-        SliderSetting {
+        Separator {}
+
+        SliderSettingPlus {
+            id: hideCount
             label: I18n.tr("Max hidden widgets")
             description: I18n.tr("Limit the number of widgets to hide. Set to 0 to hide all.")
             settingKey: "hideCount"
             defaultValue: 0
             minimum: 0
             maximum: 20
-            unit: ""
+            leftLabel: "0"
+            rightLabel: "20"
+        }
+    }
+
+    SettingsCard {
+        SectionTitle { 
+            id: usageTitle
+            text: I18n.tr("Usage Guide")
+            icon: "menu_book" 
+            collapsible: true
+            settingKey: "usageGuideExpanded"
+        }
+
+        UsageGuide {
+            expanded: usageTitle.isExpanded
+            items: [
+                I18n.tr("<b>Hover</b> the icon (or trigger zone) to temporarily expand the hidden area."),
+                I18n.tr("<b>Left-click</b> the icon to manually toggle the expanded state."),
+                I18n.tr("<b>Right-click</b> the icon while expanded to <b>PIN</b> (prevent auto-collapse).")
+            ]
         }
     }
 
