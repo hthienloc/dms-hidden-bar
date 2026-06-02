@@ -31,20 +31,62 @@ PluginSettings {
             }
         }
 
-        ToggleSettingPlus {
-            id: startExpanded
-            label: I18n.tr("Start expanded")
-            settingKey: "startExpanded"
-            defaultValue: false
+        Item {
+            width: parent.width
+            height: startExpanded.height
+
+            HoverHandler {
+                id: startExpandedHover
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                anchors.leftMargin: -12
+                anchors.rightMargin: -12
+                anchors.topMargin: -6
+                anchors.bottomMargin: -6
+                radius: Theme.cornerRadius
+                color: startExpandedHover.hovered ? Theme.withAlpha(Theme.primary, 0.08) : "transparent"
+                Behavior on color { ColorAnimation { duration: 150 } }
+            }
+
+            ToggleSettingPlus {
+                id: startExpanded
+                width: parent.width
+                label: I18n.tr("Start expanded")
+                settingKey: "startExpanded"
+                defaultValue: false
+            }
         }
 
         Separator {}
 
-        ToggleSettingPlus {
-            id: autoExpand
-            label: I18n.tr("Auto-expand on hover")
-            settingKey: "autoExpand"
-            defaultValue: true
+        Item {
+            width: parent.width
+            height: autoExpand.height
+
+            HoverHandler {
+                id: autoExpandHover
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                anchors.leftMargin: -12
+                anchors.rightMargin: -12
+                anchors.topMargin: -6
+                anchors.bottomMargin: -6
+                radius: Theme.cornerRadius
+                color: autoExpandHover.hovered ? Theme.withAlpha(Theme.primary, 0.08) : "transparent"
+                Behavior on color { ColorAnimation { duration: 150 } }
+            }
+
+            ToggleSettingPlus {
+                id: autoExpand
+                width: parent.width
+                label: I18n.tr("Auto-expand on hover")
+                settingKey: "autoExpand"
+                defaultValue: true
+            }
         }
 
         Separator {
@@ -69,11 +111,32 @@ PluginSettings {
 
         Separator {}
 
-        ToggleSettingPlus {
-            id: autoCollapse
-            label: I18n.tr("Auto-collapse")
-            settingKey: "autoCollapse"
-            defaultValue: true
+        Item {
+            width: parent.width
+            height: autoCollapse.height
+
+            HoverHandler {
+                id: autoCollapseHover
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                anchors.leftMargin: -12
+                anchors.rightMargin: -12
+                anchors.topMargin: -6
+                anchors.bottomMargin: -6
+                radius: Theme.cornerRadius
+                color: autoCollapseHover.hovered ? Theme.withAlpha(Theme.primary, 0.08) : "transparent"
+                Behavior on color { ColorAnimation { duration: 150 } }
+            }
+
+            ToggleSettingPlus {
+                id: autoCollapse
+                width: parent.width
+                label: I18n.tr("Auto-collapse")
+                settingKey: "autoCollapse"
+                defaultValue: true
+            }
         }
 
         Separator {
@@ -110,22 +173,64 @@ PluginSettings {
             }
         }
 
-        ToggleSettingPlus {
-            id: extendedTrigger
-            label: I18n.tr("Extended trigger area")
-            description: I18n.tr("Allow triggering expansion by hovering over the area where icons are hidden.")
-            settingKey: "extendedTrigger"
-            defaultValue: true
+        Item {
+            width: parent.width
+            height: extendedTrigger.height
+
+            HoverHandler {
+                id: extendedTriggerHover
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                anchors.leftMargin: -12
+                anchors.rightMargin: -12
+                anchors.topMargin: -6
+                anchors.bottomMargin: -6
+                radius: Theme.cornerRadius
+                color: extendedTriggerHover.hovered ? Theme.withAlpha(Theme.primary, 0.08) : "transparent"
+                Behavior on color { ColorAnimation { duration: 150 } }
+            }
+
+            ToggleSettingPlus {
+                id: extendedTrigger
+                width: parent.width
+                label: I18n.tr("Extended trigger area")
+                description: I18n.tr("Allow triggering expansion by hovering over the area where icons are hidden.")
+                settingKey: "extendedTrigger"
+                defaultValue: true
+            }
         }
 
         Separator {}
 
-        ToggleSettingPlus {
-            id: showRegionPreview
-            label: I18n.tr("Show region preview")
-            description: I18n.tr("Highlight the expansion trigger zone.")
-            settingKey: "showRegionPreview"
-            defaultValue: false
+        Item {
+            width: parent.width
+            height: showRegionPreview.height
+
+            HoverHandler {
+                id: showRegionPreviewHover
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                anchors.leftMargin: -12
+                anchors.rightMargin: -12
+                anchors.topMargin: -6
+                anchors.bottomMargin: -6
+                radius: Theme.cornerRadius
+                color: showRegionPreviewHover.hovered ? Theme.withAlpha(Theme.primary, 0.08) : "transparent"
+                Behavior on color { ColorAnimation { duration: 150 } }
+            }
+
+            ToggleSettingPlus {
+                id: showRegionPreview
+                width: parent.width
+                label: I18n.tr("Show region preview")
+                description: I18n.tr("Highlight the expansion trigger zone.")
+                settingKey: "showRegionPreview"
+                defaultValue: false
+            }
         }
 
         Separator {}
@@ -157,22 +262,64 @@ PluginSettings {
             }
         }
 
-        ToggleSettingPlus {
-            id: excludeTray
-            label: I18n.tr("Keep System Tray")
-            description: I18n.tr("Never hide the system tray widgets.")
-            settingKey: "excludeTray"
-            defaultValue: true
+        Item {
+            width: parent.width
+            height: excludeTray.height
+
+            HoverHandler {
+                id: excludeTrayHover
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                anchors.leftMargin: -12
+                anchors.rightMargin: -12
+                anchors.topMargin: -6
+                anchors.bottomMargin: -6
+                radius: Theme.cornerRadius
+                color: excludeTrayHover.hovered ? Theme.withAlpha(Theme.primary, 0.08) : "transparent"
+                Behavior on color { ColorAnimation { duration: 150 } }
+            }
+
+            ToggleSettingPlus {
+                id: excludeTray
+                width: parent.width
+                label: I18n.tr("Keep System Tray")
+                description: I18n.tr("Never hide the system tray widgets.")
+                settingKey: "excludeTray"
+                defaultValue: true
+            }
         }
 
         Separator {}
 
-        ToggleSettingPlus {
-            id: excludeClock
-            label: I18n.tr("Keep Clock")
-            description: I18n.tr("Never hide the clock widget.")
-            settingKey: "excludeClock"
-            defaultValue: true
+        Item {
+            width: parent.width
+            height: excludeClock.height
+
+            HoverHandler {
+                id: excludeClockHover
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                anchors.leftMargin: -12
+                anchors.rightMargin: -12
+                anchors.topMargin: -6
+                anchors.bottomMargin: -6
+                radius: Theme.cornerRadius
+                color: excludeClockHover.hovered ? Theme.withAlpha(Theme.primary, 0.08) : "transparent"
+                Behavior on color { ColorAnimation { duration: 150 } }
+            }
+
+            ToggleSettingPlus {
+                id: excludeClock
+                width: parent.width
+                label: I18n.tr("Keep Clock")
+                description: I18n.tr("Never hide the clock widget.")
+                settingKey: "excludeClock"
+                defaultValue: true
+            }
         }
 
         Separator {}
@@ -187,6 +334,48 @@ PluginSettings {
             maximum: 20
             leftLabel: "0"
             rightLabel: "20"
+        }
+    }
+
+    SettingsCard {
+        SectionTitle { 
+            id: ipcTitle
+            text: I18n.tr("IPC Commands")
+            icon: "terminal" 
+            collapsible: true
+            isExpanded: false
+            settingKey: "ipcCommandsExpanded"
+        }
+
+        Column {
+            width: parent.width
+            spacing: Theme.spacingM
+            visible: ipcTitle.isExpanded
+
+            CopyBox {
+                label: I18n.tr("Toggle Expansion")
+                text: "dms ipc call hiddenBar toggle"
+            }
+
+            CopyBox {
+                label: I18n.tr("Expand Area")
+                text: "dms ipc call hiddenBar expand"
+            }
+
+            CopyBox {
+                label: I18n.tr("Collapse Area")
+                text: "dms ipc call hiddenBar collapse"
+            }
+
+            CopyBox {
+                label: I18n.tr("Pin Expansion")
+                text: "dms ipc call hiddenBar pin"
+            }
+
+            CopyBox {
+                label: I18n.tr("Unpin Expansion")
+                text: "dms ipc call hiddenBar unpin"
+            }
         }
     }
 
