@@ -47,7 +47,10 @@ PluginSettings {
             defaultValue: true
         }
 
-        Separator {}
+        Separator {
+            visible: autoExpand.value
+            height: visible ? 1 : 0
+        }
 
         SliderSettingPlus {
             id: hoverDelay
@@ -60,6 +63,8 @@ PluginSettings {
             unit: "ms"
             leftLabel: "0"
             rightLabel: "1000"
+            visible: autoExpand.value
+            height: visible ? implicitHeight : 0
         }
 
         Separator {}
@@ -71,7 +76,10 @@ PluginSettings {
             defaultValue: true
         }
 
-        Separator {}
+        Separator {
+            visible: autoCollapse.value
+            height: visible ? 1 : 0
+        }
 
         SliderSettingPlus {
             id: collapseDelay
@@ -84,7 +92,8 @@ PluginSettings {
             unit: "ms"
             leftLabel: "0"
             rightLabel: "10000"
-            enabled: autoCollapse.value
+            visible: autoCollapse.value
+            height: visible ? implicitHeight : 0
         }
     }
 
