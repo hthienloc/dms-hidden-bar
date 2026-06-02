@@ -16,7 +16,10 @@ PluginComponent {
     readonly property bool excludeTray: pluginData.excludeTray ?? true
     readonly property bool excludeClock: pluginData.excludeClock ?? true
     readonly property bool autoCollapse: pluginData.autoCollapse ?? true
-    readonly property int collapseDelay: pluginData.collapseDelay ?? 1000
+    readonly property int collapseDelay: {
+        const val = pluginData.collapseDelay ?? 1;
+        return val <= 100 ? val * 1000 : val;
+    }
     property bool isPinned: false
     readonly property int expandedHeight: Theme.iconSizeLarge + Theme.spacingM
     readonly property int collapsedHeight: 4

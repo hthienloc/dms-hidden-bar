@@ -86,12 +86,12 @@ PluginSettings {
             label: I18n.tr("Collapse delay")
             description: I18n.tr("Wait time before collapsing automatically.")
             settingKey: "collapseDelay"
-            defaultValue: 1000
+            defaultValue: 1
             minimum: 0
-            maximum: 10000
-            unit: "ms"
+            maximum: 10
+            unit: "s"
             leftLabel: "0"
-            rightLabel: "10000"
+            rightLabel: "10"
             visible: autoCollapse.value
             height: visible ? implicitHeight : 0
         }
