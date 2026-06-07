@@ -184,7 +184,7 @@ PluginComponent {
     verticalBarPill: horizontalBarPill
 
     popoutWidth: pluginRoot.popoutLayout === "row" ? Math.max(hiddenPluginIds.length * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2, 60) : 240
-    popoutHeight: pluginRoot.popoutLayout === "row" ? Theme.iconSizeSmall + Theme.spacingM * 2 : Math.ceil(hiddenPluginIds.length / 4) * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2
+    popoutHeight: pluginRoot.popoutLayout === "row" ? pluginRoot.barThickness : Math.ceil(hiddenPluginIds.length / 4) * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2
 
     popoutContent: Component {
         PopoutComponent {
@@ -203,7 +203,9 @@ PluginComponent {
                 id: rowLayout
                 Row {
                     spacing: Theme.spacingM
-                    padding: Theme.spacingM
+                    leftPadding: Theme.spacingM
+                    rightPadding: Theme.spacingM
+                    anchors.verticalCenter: parent.verticalCenter
                     Repeater {
                         model: pluginRoot.hiddenPluginIds
                         delegate: widgetDelegate
