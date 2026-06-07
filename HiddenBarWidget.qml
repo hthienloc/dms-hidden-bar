@@ -291,12 +291,15 @@ PluginComponent {
                                 const original = delegateRoot.originalWidget;
                                 if (original && item.hasOwnProperty("pillClickAction")) {
                                     item.pillClickAction = function() {
-                                        // Calculate position of THIS copy
-                                        const globalPos = item.mapToItem(null, 0, 0);
+                                        // 1. Get position of the MAIN Hidden Bar pill on the status bar
+                                        const mainPill = pluginRoot.isVertical ? pluginRoot.verticalPill : pluginRoot.horizontalPill;
+                                        if (!mainPill || !mainPill.visualContent) return;
+                                        
+                                        const globalPos = mainPill.visualContent.mapToItem(null, 0, 0);
                                         const currentScreen = pluginRoot.parentScreen || Screen;
                                         const barPosition = pluginRoot.axis?.edge === "left" ? 2 : (pluginRoot.axis?.edge === "right" ? 3 : (pluginRoot.axis?.edge === "top" ? 0 : 1));
                                         
-                                        // Find original's popout object
+                                        // 2. Find original's popout object
                                         let targetPopout = null;
                                         for (let i = 0; i < original.children.length; i++) {
                                             const child = original.children[i];
@@ -306,22 +309,22 @@ PluginComponent {
                                             }
                                         }
 
-                                        // Close parent popout
+                                        // 3. Close hidden bar popout FIRST
                                         pluginRoot.closePopout();
 
-                                        // Trigger real popout at this position
-                                        if (targetPopout) {
-                                            Qt.callLater(() => {
+                                        // 4. Trigger real popout at the MAIN BAR position
+                                        Qt.callLater(() => {
+                                            if (targetPopout) {
                                                 targetPopout.setTriggerPosition(
-                                                    globalPos.x, globalPos.y, item.width, 
+                                                    globalPos.x, globalPos.y, mainPill.visualWidth, 
                                                     pluginRoot.section, currentScreen,
                                                     barPosition, pluginRoot.barThickness, pluginRoot.barSpacing, pluginRoot.barConfig
                                                 );
                                                 targetPopout.open();
-                                            });
-                                        } else {
-                                            Qt.callLater(() => original.triggerPopout());
-                                        }
+                                            } else {
+                                                original.triggerPopout();
+                                            }
+                                        });
                                     }
                                 }
                             }
