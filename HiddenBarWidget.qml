@@ -291,11 +291,12 @@ PluginComponent {
                                 const original = delegateRoot.originalWidget;
                                 if (original && item.hasOwnProperty("pillClickAction")) {
                                     item.pillClickAction = function() {
-                                        // 1. Get position of the MAIN Hidden Bar pill on the status bar
-                                        const mainPill = pluginRoot.isVertical ? pluginRoot.verticalPill : pluginRoot.horizontalPill;
-                                        if (!mainPill || !mainPill.visualContent) return;
+                                        // 1. Inherit the EXACT screen coordinates from the Hidden Bar's own popout
+                                        // This ensures pixel-perfect alignment with the status bar
+                                        const tx = pluginRoot.pluginPopout.triggerX;
+                                        const ty = pluginRoot.pluginPopout.triggerY;
+                                        const tw = pluginRoot.pluginPopout.triggerWidth;
                                         
-                                        const globalPos = mainPill.visualContent.mapToItem(null, 0, 0);
                                         const currentScreen = pluginRoot.parentScreen || Screen;
                                         const barPosition = pluginRoot.axis?.edge === "left" ? 2 : (pluginRoot.axis?.edge === "right" ? 3 : (pluginRoot.axis?.edge === "top" ? 0 : 1));
                                         
@@ -312,11 +313,11 @@ PluginComponent {
                                         // 3. Close hidden bar popout FIRST
                                         pluginRoot.closePopout();
 
-                                        // 4. Trigger real popout at the MAIN BAR position
+                                        // 4. Trigger real popout at the INHERITED position
                                         Qt.callLater(() => {
                                             if (targetPopout) {
                                                 targetPopout.setTriggerPosition(
-                                                    globalPos.x, globalPos.y, mainPill.visualWidth, 
+                                                    tx, ty, tw, 
                                                     pluginRoot.section, currentScreen,
                                                     barPosition, pluginRoot.barThickness, pluginRoot.barSpacing, pluginRoot.barConfig
                                                 );
