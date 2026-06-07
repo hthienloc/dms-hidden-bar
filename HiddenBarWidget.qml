@@ -303,9 +303,9 @@ PluginComponent {
                                 const original = delegateRoot.originalWidget;
                                 if (original && item.hasOwnProperty("pillClickAction")) {
                                     item.pillClickAction = function() {
-                                        // 1. Get position from Bar context
+                                        // 1. Get accurate position from the MAIN BAR context
                                         const pos = pluginRoot.getMainPillScreenPos();
-                                        const currentScreen = pluginRoot.parentScreen || Screen;
+                                        const currentScreen = pluginRoot.parentScreen; // Use plugin's assigned screen
                                         const barPosition = pluginRoot.axis?.edge === "left" ? 2 : (pluginRoot.axis?.edge === "right" ? 3 : (pluginRoot.axis?.edge === "top" ? 0 : 1));
                                         
                                         // 2. Find original's popout object
@@ -318,42 +318,19 @@ PluginComponent {
                                             }
                                         }
 
-                                        // 3. Close hidden bar popout
-                                        pluginRoot.closePopout();
-
-                                        // 4. Trigger real popout with "Ghost Mode"
-                                        Qt.callLater(() => {
-                                            if (targetPopout) {
-                                                // Temporarily make original "visible" so popout isn't hidden by inheritance
-                                                // but keep it transparent so it doesn't flicker on the bar
-                                                if (original.parent) {
-                                                    original.parent.visible = true;
-                                                    original.parent.opacity = 0;
-                                                }
-
-                                                targetPopout.setTriggerPosition(
-                                                    pos.x, pos.y, pos.width, 
-                                                    pluginRoot.section, currentScreen,
-                                                    barPosition, pluginRoot.barThickness, pluginRoot.barSpacing, pluginRoot.barConfig
-                                                );
-                                                
-                                                // Listen for close to re-hide
-                                                const cleanup = () => {
-                                                    if (targetPopout.visible === false) {
-                                                        if (original.parent) {
-                                                            original.parent.visible = false;
-                                                            original.parent.opacity = 1;
-                                                        }
-                                                        targetPopout.visibleChanged.disconnect(cleanup);
-                                                    }
-                                                };
-                                                targetPopout.visibleChanged.connect(cleanup);
-                                                
-                                                targetPopout.open();
-                                            } else {
-                                                original.triggerPopout();
-                                            }
-                                        });
+                                        // 3. Trigger handoff: Update coordinates and open
+                                        // We DON'T manually close our own popout; calling targetPopout.open() 
+                                        // will trigger PopoutManager.requestPopout, which handles the swap safely.
+                                        if (targetPopout) {
+                                            targetPopout.setTriggerPosition(
+                                                pos.x, pos.y, pos.width, 
+                                                pluginRoot.section, currentScreen,
+                                                barPosition, pluginRoot.barThickness, pluginRoot.barSpacing, pluginRoot.barConfig
+                                            );
+                                            targetPopout.open();
+                                        } else {
+                                            original.triggerPopout();
+                                        }
                                     }
                                 }
                             }
