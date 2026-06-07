@@ -473,13 +473,6 @@ PluginComponent {
 
                 }
 
-                Behavior on rotation {
-                    NumberAnimation {
-                        duration: 200
-                        easing.type: Easing.InOutQuad
-                    }
-                }
-
             }
 
             Rectangle {
