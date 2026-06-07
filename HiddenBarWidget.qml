@@ -445,10 +445,8 @@ PluginComponent {
                     if (root.isPinned)
                         return "push_pin";
 
-                    if (root.usePopout) {
-                        const isOpened = root.pluginPopout && root.pluginPopout.visible;
-                        return isOpened ? "expand_more" : "expand_less";
-                    }
+                    if (root.usePopout)
+                        return "expand_less";
 
                     if (root.section === "right")
                         return root.isExpanded ? "chevron_left" : "chevron_right";
@@ -456,6 +454,7 @@ PluginComponent {
                         return root.isExpanded ? "chevron_right" : "chevron_left";
                     return root.isExpanded ? "view-conceal-symbolic" : "view-visible-symbolic";
                 }
+                rotation: (root.usePopout && root.pluginPopout && root.pluginPopout.visible) ? 180 : 0
                 color: Theme.surfaceText
                 opacity: (root.isExpanded || (root.usePopout && root.pluginPopout && root.pluginPopout.visible)) ? 1 : 0.6
 
@@ -464,6 +463,13 @@ PluginComponent {
                         duration: 200
                     }
 
+                }
+
+                Behavior on rotation {
+                    NumberAnimation {
+                        duration: 200
+                        easing.type: Easing.InOutQuad
+                    }
                 }
 
             }
