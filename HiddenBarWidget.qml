@@ -223,9 +223,6 @@ PluginComponent {
                 hoverEnabled: true
                 onContainsMouseChanged: pluginRoot._popoutHovered = containsMouse
                 propagateComposedEvents: true
-                onClicked: (mouse) => mouse.accepted = false
-                onPressed: (mouse) => mouse.accepted = false
-                onReleased: (mouse) => mouse.accepted = false
 
                 Loader {
                     anchors.fill: parent
@@ -236,7 +233,7 @@ PluginComponent {
             Component {
                 id: rowLayout
                 Row {
-                    width: pluginRoot._totalManagedWidth + Theme.spacingM * 2
+                    width: parent.width
                     height: parent.height
                     spacing: Theme.spacingM
                     leftPadding: Theme.spacingM
@@ -267,56 +264,65 @@ PluginComponent {
                 Item {
                     id: delegateRoot
                     implicitWidth: pluginRoot._sizeCache[modelData] || Theme.iconSizeSmall
-                    height: pluginRoot.popoutLayout === "row" ? parent.height : Theme.iconSizeSmall
+                    height: parent.height
+                    anchors.verticalCenter: parent.verticalCenter
                     
                     readonly property var originalWidget: {
                         if (!pluginRoot.parentScreen) return null;
                         return BarWidgetService.getWidget(modelData, pluginRoot.parentScreen.name);
                     }
 
-                    DankIcon {
-                        id: proxyIcon
-                        anchors.centerIn: parent
-                        size: Theme.iconSizeSmall
-                        name: delegateRoot.originalWidget ? delegateRoot.originalWidget.icon : "extension"
-                        color: Theme.surfaceText
+                    Loader {
+                        id: widgetLoader
+                        readonly property string targetPluginId: modelData
+                        anchors.fill: parent
                         
-                        MouseArea {
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onClicked: {
-                                const widget = delegateRoot.originalWidget;
-                                if (!widget) return;
+                        sourceComponent: PluginService.pluginWidgetComponents[targetPluginId] || null
+                        
+                        onLoaded: {
+                            if (item) {
+                                // 1. Standard init
+                                if (item.pluginId !== undefined) item.pluginId = targetPluginId;
+                                if (item.pluginService !== undefined) item.pluginService = PluginService;
+                                if (item.popoutService !== undefined) item.popoutService = PopoutService;
+                                if (item.isVertical !== undefined) item.isVertical = false;
 
-                                // 1. Calculate screen coordinates of this proxy icon
-                                const globalPos = proxyIcon.mapToItem(null, 0, 0);
-                                
-                                // 2. Find the internal popout object of the original widget
-                                let targetPopout = null;
-                                for (let i = 0; i < widget.children.length; i++) {
-                                    const child = widget.children[i];
-                                    if (child.hasOwnProperty("shouldBeVisible") && child.hasOwnProperty("pluginContent")) {
-                                        targetPopout = child;
-                                        break;
-                                    }
-                                }
-
-                                // 3. Close hidden bar popout first
-                                pluginRoot.closePopout();
-
-                                // 4. Trigger the real popout at the proxy's position
-                                if (targetPopout) {
-                                    Qt.callLater(() => {
+                                // 2. Proxy Click Logic: Override click to trigger the REAL plugin
+                                const original = delegateRoot.originalWidget;
+                                if (original && item.hasOwnProperty("pillClickAction")) {
+                                    item.pillClickAction = function() {
+                                        // Calculate position of THIS copy
+                                        const globalPos = item.mapToItem(null, 0, 0);
+                                        const currentScreen = pluginRoot.parentScreen || Screen;
                                         const barPosition = pluginRoot.axis?.edge === "left" ? 2 : (pluginRoot.axis?.edge === "right" ? 3 : (pluginRoot.axis?.edge === "top" ? 0 : 1));
-                                        targetPopout.setTriggerPosition(
-                                            globalPos.x, globalPos.y, proxyIcon.width, 
-                                            pluginRoot.section, pluginRoot.parentScreen,
-                                            barPosition, pluginRoot.barThickness, pluginRoot.barSpacing, pluginRoot.barConfig
-                                        );
-                                        targetPopout.open();
-                                    });
-                                } else {
-                                    Qt.callLater(() => widget.triggerPopout());
+                                        
+                                        // Find original's popout object
+                                        let targetPopout = null;
+                                        for (let i = 0; i < original.children.length; i++) {
+                                            const child = original.children[i];
+                                            if (child.hasOwnProperty("shouldBeVisible") && child.hasOwnProperty("pluginContent")) {
+                                                targetPopout = child;
+                                                break;
+                                            }
+                                        }
+
+                                        // Close parent popout
+                                        pluginRoot.closePopout();
+
+                                        // Trigger real popout at this position
+                                        if (targetPopout) {
+                                            Qt.callLater(() => {
+                                                targetPopout.setTriggerPosition(
+                                                    globalPos.x, globalPos.y, item.width, 
+                                                    pluginRoot.section, currentScreen,
+                                                    barPosition, pluginRoot.barThickness, pluginRoot.barSpacing, pluginRoot.barConfig
+                                                );
+                                                targetPopout.open();
+                                            });
+                                        } else {
+                                            Qt.callLater(() => original.triggerPopout());
+                                        }
+                                    }
                                 }
                             }
                         }
