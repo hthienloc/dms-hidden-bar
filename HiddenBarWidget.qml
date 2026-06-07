@@ -204,7 +204,7 @@ PluginComponent {
         }
         return 240;
     }
-    popoutHeight: pluginRoot.popoutLayout === "row" ? (pluginRoot.barThickness + 4) : Math.ceil(hiddenPluginIds.length / 4) * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2
+    popoutHeight: pluginRoot.popoutLayout === "row" ? (pluginRoot.barThickness + Theme.spacingS * 2) : Math.ceil(hiddenPluginIds.length / 4) * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2
 
     popoutContent: Component {
         PopoutComponent {
@@ -219,7 +219,7 @@ PluginComponent {
 
             MouseArea {
                 width: parent.width
-                height: pluginRoot.popoutLayout === "row" ? (pluginRoot.popoutHeight - pluginRoot._popoutInternalMargin * 2) : undefined
+                height: pluginRoot.popoutLayout === "row" ? pluginRoot.barThickness : undefined
                 hoverEnabled: true
                 onContainsMouseChanged: pluginRoot._popoutHovered = containsMouse
                 propagateComposedEvents: true
@@ -267,13 +267,14 @@ PluginComponent {
                 Item {
                     id: delegateRoot
                     implicitWidth: pluginRoot._sizeCache[modelData] || Theme.iconSizeSmall
-                    implicitHeight: Theme.iconSizeSmall
-                    anchors.verticalCenter: parent ? parent.verticalCenter : undefined
-
+                    height: pluginRoot.popoutLayout === "row" ? parent.height : Theme.iconSizeSmall
+                    
                     Loader {
                         id: widgetLoader
                         readonly property string targetPluginId: modelData
-                        anchors.fill: parent
+                        anchors.centerIn: parent
+                        width: parent.width
+                        height: Theme.iconSizeSmall
                         
                         sourceComponent: PluginService.pluginWidgetComponents[targetPluginId] || null
                         
