@@ -28,6 +28,9 @@ PluginComponent {
     readonly property int hideCount: pluginData.hideCount ?? 0
     readonly property bool showRegionPreview: pluginData.showRegionPreview ?? false
     readonly property int triggerAdjustment: pluginData.triggerAdjustment ?? 0
+    readonly property bool usePopout: pluginData.usePopout ?? false
+    onUsePopoutChanged: updateWidgets()
+    property var hiddenPluginIds: []
     property real hiddenAreaSize: 0
     property var _sizeCache: ({
     }) // Cache for widget sizes
@@ -111,12 +114,19 @@ PluginComponent {
         });
         let limit = (root.hideCount > 0) ? root.hideCount : candidates.length;
         let totalSize = 0;
+        let newHiddenIds = [];
         for (let j = 0; j < candidates.length; j++) {
             let c = candidates[j];
             let shouldBeHidden = (j < limit);
             if (shouldBeHidden) {
-                if (c.widget.parent)
-                    c.widget.parent.visible = root.isExpanded;
+                if (root.usePopout) {
+                    newHiddenIds.push(c.id);
+                    if (c.widget.parent)
+                        c.widget.parent.visible = false;
+                } else {
+                    if (c.widget.parent)
+                        c.widget.parent.visible = root.isExpanded;
+                }
 
                 // Get size, using cache if current size is 0 (hidden)
                 let currentSize = root.isVertical ? (c.widget.implicitHeight || (c.widget.parent && c.widget.parent.parent ? c.widget.parent.parent.height : 0)) : (c.widget.implicitWidth || (c.widget.parent && c.widget.parent.parent ? c.widget.parent.parent.width : 0));
@@ -133,6 +143,8 @@ PluginComponent {
 
             }
         }
+        root.hiddenPluginIds = newHiddenIds;
+
         // Cleanup cache for unregistered widgets
         let cacheKeys = Object.keys(root._sizeCache);
         for (let k = 0; k < cacheKeys.length; k++) {
@@ -140,7 +152,7 @@ PluginComponent {
                 delete root._sizeCache[cacheKeys[k]];
 
         }
-        if (totalSize > 0) {
+        if (totalSize > 0 && !root.usePopout) {
             let newSize = totalSize + Theme.spacingM;
             if (Math.abs(root.hiddenAreaSize - newSize) > 1)
                 root.hiddenAreaSize = newSize;
@@ -155,7 +167,7 @@ PluginComponent {
         updateAnyHovered();
     }
     onAnyHoveredChanged: handleHover(anyHovered)
-    pillClickAction: function() {
+    pillClickAction: root.usePopout ? null : function() {
         root.isExpanded = !root.isExpanded;
         root.isPinned = false;
         updateWidgets();
@@ -166,6 +178,43 @@ PluginComponent {
             collapseTimer.stop();
     }
     verticalBarPill: horizontalBarPill
+
+    popoutWidth: 320
+    popoutHeight: 180
+
+    popoutContent: Component {
+        PopoutComponent {
+            headerText: I18n.tr("Hidden Plugins")
+            showCloseButton: true
+
+            Flow {
+                width: parent.width
+                spacing: Theme.spacingM
+                padding: Theme.spacingM
+
+                Repeater {
+                    model: root.hiddenPluginIds
+                    delegate: Loader {
+                        id: widgetLoader
+                        readonly property string targetPluginId: modelData
+                        
+                        // We use the Bar pill component for the overflow menu
+                        sourceComponent: PluginService.pluginWidgetComponents[targetPluginId] || null
+                        
+                        onLoaded: {
+                            if (item) {
+                                // Initialize standard plugin properties
+                                if (item.pluginId !== undefined) item.pluginId = targetPluginId;
+                                if (item.pluginService !== undefined) item.pluginService = PluginService;
+                                if (item.popoutService !== undefined) item.popoutService = PopoutService;
+                                if (item.isVertical !== undefined) item.isVertical = false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     Timer {
         id: hoverGraceTimer

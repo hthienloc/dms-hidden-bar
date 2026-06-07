@@ -21,8 +21,9 @@ PluginSettings {
         SectionTitle { 
             text: I18n.tr("Expansion & Collapse")
             icon: "unfold_more" 
-            showReset: startExpanded.isDirty || autoExpand.isDirty || hoverDelay.isDirty || autoCollapse.isDirty || collapseDelay.isDirty
+            showReset: usePopout.isDirty || startExpanded.isDirty || autoExpand.isDirty || hoverDelay.isDirty || autoCollapse.isDirty || collapseDelay.isDirty
             onResetClicked: {
+                usePopout.resetToDefault();
                 startExpanded.resetToDefault();
                 autoExpand.resetToDefault();
                 hoverDelay.resetToDefault();
@@ -30,6 +31,16 @@ PluginSettings {
                 collapseDelay.resetToDefault();
             }
         }
+
+        ToggleSettingPlus {
+            id: usePopout
+            label: I18n.tr("Use Popout Overflow")
+            description: I18n.tr("Show hidden plugins in a separate popout menu instead of expanding the status bar.")
+            settingKey: "usePopout"
+            defaultValue: false
+        }
+
+        Separator {}
 
         ToggleSettingPlus {
             id: startExpanded
