@@ -21,9 +21,10 @@ PluginSettings {
         SectionTitle { 
             text: I18n.tr("Expansion & Collapse")
             icon: "unfold_more" 
-            showReset: usePopout.isDirty || startExpanded.isDirty || autoExpand.isDirty || hoverDelay.isDirty || autoCollapse.isDirty || collapseDelay.isDirty
+            showReset: usePopout.isDirty || popoutLayout.isDirty || startExpanded.isDirty || autoExpand.isDirty || hoverDelay.isDirty || autoCollapse.isDirty || collapseDelay.isDirty
             onResetClicked: {
                 usePopout.resetToDefault();
+                popoutLayout.resetToDefault();
                 startExpanded.resetToDefault();
                 autoExpand.resetToDefault();
                 hoverDelay.resetToDefault();
@@ -40,6 +41,25 @@ PluginSettings {
             defaultValue: false
         }
 
+        Separator {
+            visible: usePopout.value
+            height: visible ? 1 : 0
+        }
+
+        SelectionSettingPlus {
+            id: popoutLayout
+            label: I18n.tr("Popout Layout")
+            description: I18n.tr("How icons are arranged inside the popout.")
+            settingKey: "popoutLayout"
+            defaultValue: "row"
+            options: [
+                { label: I18n.tr("Horizontal Row"), value: "row" },
+                { label: I18n.tr("Grid"), value: "grid" }
+            ]
+            visible: usePopout.value
+            height: visible ? implicitHeight : 0
+        }
+
         Separator {}
 
         ToggleSettingPlus {
@@ -47,15 +67,22 @@ PluginSettings {
             label: I18n.tr("Start expanded")
             settingKey: "startExpanded"
             defaultValue: false
+            visible: !usePopout.value
+            height: visible ? implicitHeight : 0
         }
 
-        Separator {}
+        Separator {
+            visible: !usePopout.value
+            height: visible ? 1 : 0
+        }
 
         ToggleSettingPlus {
             id: autoExpand
             label: I18n.tr("Auto-expand on hover")
             settingKey: "autoExpand"
             defaultValue: true
+            visible: !usePopout.value
+            height: visible ? implicitHeight : 0
         }
 
         Separator {

@@ -29,6 +29,7 @@ PluginComponent {
     readonly property bool showRegionPreview: pluginData.showRegionPreview ?? false
     readonly property int triggerAdjustment: pluginData.triggerAdjustment ?? 0
     readonly property bool usePopout: pluginData.usePopout ?? false
+    readonly property string popoutLayout: pluginData.popoutLayout ?? "row"
     onUsePopoutChanged: updateWidgets()
     property var hiddenPluginIds: []
     property real hiddenAreaSize: 0
@@ -179,36 +180,58 @@ PluginComponent {
     }
     verticalBarPill: horizontalBarPill
 
-    popoutWidth: 320
-    popoutHeight: 180
+    popoutWidth: root.popoutLayout === "row" ? Math.max(hiddenPluginIds.length * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2, 60) : 240
+    popoutHeight: root.popoutLayout === "row" ? Theme.iconSizeSmall + Theme.spacingM * 2 : Math.ceil(hiddenPluginIds.length / 4) * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2
 
     popoutContent: Component {
         PopoutComponent {
-            headerText: I18n.tr("Hidden Plugins")
-            showCloseButton: true
+            headerText: ""
+            showCloseButton: false
 
-            Flow {
+            Loader {
                 width: parent.width
-                spacing: Theme.spacingM
-                padding: Theme.spacingM
+                sourceComponent: root.popoutLayout === "grid" ? gridLayout : rowLayout
+            }
 
-                Repeater {
-                    model: root.hiddenPluginIds
-                    delegate: Loader {
-                        id: widgetLoader
-                        readonly property string targetPluginId: modelData
-                        
-                        // We use the Bar pill component for the overflow menu
-                        sourceComponent: PluginService.pluginWidgetComponents[targetPluginId] || null
-                        
-                        onLoaded: {
-                            if (item) {
-                                // Initialize standard plugin properties
-                                if (item.pluginId !== undefined) item.pluginId = targetPluginId;
-                                if (item.pluginService !== undefined) item.pluginService = PluginService;
-                                if (item.popoutService !== undefined) item.popoutService = PopoutService;
-                                if (item.isVertical !== undefined) item.isVertical = false;
-                            }
+            Component {
+                id: rowLayout
+                Row {
+                    spacing: Theme.spacingM
+                    padding: Theme.spacingM
+                    Repeater {
+                        model: root.hiddenPluginIds
+                        delegate: widgetDelegate
+                    }
+                }
+            }
+
+            Component {
+                id: gridLayout
+                Flow {
+                    width: parent.width
+                    spacing: Theme.spacingM
+                    padding: Theme.spacingM
+                    Repeater {
+                        model: root.hiddenPluginIds
+                        delegate: widgetDelegate
+                    }
+                }
+            }
+
+            Component {
+                id: widgetDelegate
+                Loader {
+                    id: widgetLoader
+                    readonly property string targetPluginId: modelData
+                    
+                    sourceComponent: PluginService.pluginWidgetComponents[targetPluginId] || null
+                    
+                    onLoaded: {
+                        if (item) {
+                            if (item.pluginId !== undefined) item.pluginId = targetPluginId;
+                            if (item.pluginService !== undefined) item.pluginService = PluginService;
+                            if (item.popoutService !== undefined) item.popoutService = PopoutService;
+                            if (item.isVertical !== undefined) item.isVertical = false;
                         }
                     }
                 }
@@ -414,6 +437,10 @@ PluginComponent {
                     if (root.isPinned)
                         return "push_pin";
 
+                    if (root.usePopout) {
+                        return (PopoutService.activePopoutId === root.pluginId) ? "expand_more" : "expand_less";
+                    }
+
                     if (root.section === "right")
                         return root.isExpanded ? "chevron_left" : "chevron_right";
                     else if (root.section === "left")
@@ -421,7 +448,7 @@ PluginComponent {
                     return root.isExpanded ? "view-conceal-symbolic" : "view-visible-symbolic";
                 }
                 color: Theme.surfaceText
-                opacity: root.isExpanded ? 1 : 0.6
+                opacity: (root.isExpanded || (root.usePopout && PopoutService.activePopoutId === root.pluginId)) ? 1 : 0.6
 
                 Behavior on opacity {
                     NumberAnimation {
