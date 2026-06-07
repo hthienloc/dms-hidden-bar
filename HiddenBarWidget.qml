@@ -55,14 +55,16 @@ PluginComponent {
 
     function handleHover(hovered) {
         if (hovered) {
-            if (root.autoExpand && !root.isExpanded) {
+            const isOpened = root.usePopout ? (root.pluginPopout && root.pluginPopout.visible) : root.isExpanded;
+            if (root.autoExpand && !isOpened) {
                 hoverTimer.interval = root.hoverDelay;
                 hoverTimer.restart();
             }
             collapseTimer.stop();
         } else {
             hoverTimer.stop();
-            if (root.isExpanded && root.autoCollapse && !root.isPinned)
+            const isOpened = root.usePopout ? (root.pluginPopout && root.pluginPopout.visible) : root.isExpanded;
+            if (isOpened && root.autoCollapse && !root.isPinned)
                 collapseTimer.restart();
 
         }
@@ -256,7 +258,9 @@ PluginComponent {
 
         repeat: false
         onTriggered: {
-            if (!root.isExpanded) {
+            if (root.usePopout) {
+                root.triggerPopout();
+            } else if (!root.isExpanded) {
                 root.isExpanded = true;
                 updateWidgets();
             }
@@ -270,7 +274,11 @@ PluginComponent {
         repeat: false
         onTriggered: {
             // Safety check: don't collapse if mouse returned to zone
-            if (root.isExpanded && !root.anyHovered) {
+            if (root.anyHovered) return;
+
+            if (root.usePopout) {
+                root.closePopout();
+            } else if (root.isExpanded) {
                 root.isExpanded = false;
                 updateWidgets();
             }
@@ -438,7 +446,8 @@ PluginComponent {
                         return "push_pin";
 
                     if (root.usePopout) {
-                        return (PopoutService.activePopoutId === root.pluginId) ? "expand_more" : "expand_less";
+                        const isOpened = root.pluginPopout && root.pluginPopout.visible;
+                        return isOpened ? "expand_more" : "expand_less";
                     }
 
                     if (root.section === "right")
@@ -448,7 +457,7 @@ PluginComponent {
                     return root.isExpanded ? "view-conceal-symbolic" : "view-visible-symbolic";
                 }
                 color: Theme.surfaceText
-                opacity: (root.isExpanded || (root.usePopout && PopoutService.activePopoutId === root.pluginId)) ? 1 : 0.6
+                opacity: (root.isExpanded || (root.usePopout && root.pluginPopout && root.pluginPopout.visible)) ? 1 : 0.6
 
                 Behavior on opacity {
                     NumberAnimation {
