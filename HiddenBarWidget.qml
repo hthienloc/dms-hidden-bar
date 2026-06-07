@@ -68,6 +68,18 @@ PluginComponent {
         }
     }
 
+    // Helper to get screen coordinates of the main bar pill.
+    // This MUST be called from the bar window context to get correct global coordinates.
+    function getMainPillScreenPos() {
+        const pill = isVertical ? verticalPill : horizontalPill;
+        if (!pill || !pill.visualContent) return { x: 0, y: 0, width: 0 };
+        
+        const globalPos = pill.visualContent.mapToItem(null, 0, 0);
+        const currentScreen = parentScreen || Screen;
+        const barPosition = axis?.edge === "left" ? 2 : (axis?.edge === "right" ? 3 : (axis?.edge === "top" ? 0 : 1));
+        return SettingsData.getPopupTriggerPosition(globalPos, currentScreen, barThickness, pill.visualWidth, barSpacing, barPosition, barConfig);
+    }
+
     function handleHover(hovered) {
         if (hovered) {
             const isOpened = pluginRoot.usePopout ? pluginRoot._popoutVisible : pluginRoot.isExpanded;
@@ -291,12 +303,8 @@ PluginComponent {
                                 const original = delegateRoot.originalWidget;
                                 if (original && item.hasOwnProperty("pillClickAction")) {
                                     item.pillClickAction = function() {
-                                        // 1. Inherit the EXACT screen coordinates from the Hidden Bar's own popout
-                                        // This ensures pixel-perfect alignment with the status bar
-                                        const tx = pluginRoot.pluginPopout.triggerX;
-                                        const ty = pluginRoot.pluginPopout.triggerY;
-                                        const tw = pluginRoot.pluginPopout.triggerWidth;
-                                        
+                                        // 1. Get the EXACT screen coordinates from the Bar window context
+                                        const pos = pluginRoot.getMainPillScreenPos();
                                         const currentScreen = pluginRoot.parentScreen || Screen;
                                         const barPosition = pluginRoot.axis?.edge === "left" ? 2 : (pluginRoot.axis?.edge === "right" ? 3 : (pluginRoot.axis?.edge === "top" ? 0 : 1));
                                         
@@ -313,11 +321,11 @@ PluginComponent {
                                         // 3. Close hidden bar popout FIRST
                                         pluginRoot.closePopout();
 
-                                        // 4. Trigger real popout at the INHERITED position
+                                        // 4. Trigger real popout at the Bar-calculated position
                                         Qt.callLater(() => {
                                             if (targetPopout) {
                                                 targetPopout.setTriggerPosition(
-                                                    tx, ty, tw, 
+                                                    pos.x, pos.y, pos.width, 
                                                     pluginRoot.section, currentScreen,
                                                     barPosition, pluginRoot.barThickness, pluginRoot.barSpacing, pluginRoot.barConfig
                                                 );
