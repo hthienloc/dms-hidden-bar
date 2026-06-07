@@ -34,6 +34,19 @@ PluginComponent {
     property var hiddenPluginIds: []
     property bool _popoutVisible: false
     property real hiddenAreaSize: 0
+
+    readonly property int _popoutInternalMargin: Theme.spacingS // From PluginPopout.qml
+    readonly property real _totalManagedWidth: {
+        let w = 0;
+        for (let i = 0; i < hiddenPluginIds.length; i++) {
+            let id = hiddenPluginIds[i];
+            w += (pluginRoot._sizeCache[id] || Theme.iconSizeSmall);
+        }
+        if (hiddenPluginIds.length > 1) {
+            w += (hiddenPluginIds.length - 1) * Theme.spacingM;
+        }
+        return w;
+    }
     property var _sizeCache: ({
     }) // Cache for widget sizes
     property bool anyHovered: false
@@ -183,7 +196,13 @@ PluginComponent {
     }
     verticalBarPill: horizontalBarPill
 
-    popoutWidth: pluginRoot.popoutLayout === "row" ? Math.max(hiddenPluginIds.length * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2, 60) : 240
+    popoutWidth: {
+        if (pluginRoot.popoutLayout === "row") {
+            if (hiddenPluginIds.length === 0) return 60;
+            return _totalManagedWidth + Theme.spacingM * 2 + _popoutInternalMargin * 2;
+        }
+        return 240;
+    }
     popoutHeight: pluginRoot.popoutLayout === "row" ? pluginRoot.barThickness : Math.ceil(hiddenPluginIds.length / 4) * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2
 
     popoutContent: Component {
@@ -196,16 +215,19 @@ PluginComponent {
 
             Loader {
                 width: parent.width
+                height: pluginRoot.popoutLayout === "row" ? (pluginRoot.barThickness - pluginRoot._popoutInternalMargin * 2) : undefined
                 sourceComponent: pluginRoot.popoutLayout === "grid" ? gridLayout : rowLayout
             }
 
             Component {
                 id: rowLayout
                 Row {
+                    width: pluginRoot._totalManagedWidth + Theme.spacingM * 2
+                    height: parent.height
                     spacing: Theme.spacingM
                     leftPadding: Theme.spacingM
                     rightPadding: Theme.spacingM
-                    anchors.verticalCenter: parent.verticalCenter
+                    
                     Repeater {
                         model: pluginRoot.hiddenPluginIds
                         delegate: widgetDelegate
@@ -228,18 +250,26 @@ PluginComponent {
 
             Component {
                 id: widgetDelegate
-                Loader {
-                    id: widgetLoader
-                    readonly property string targetPluginId: modelData
-                    
-                    sourceComponent: PluginService.pluginWidgetComponents[targetPluginId] || null
-                    
-                    onLoaded: {
-                        if (item) {
-                            if (item.pluginId !== undefined) item.pluginId = targetPluginId;
-                            if (item.pluginService !== undefined) item.pluginService = PluginService;
-                            if (item.popoutService !== undefined) item.popoutService = PopoutService;
-                            if (item.isVertical !== undefined) item.isVertical = false;
+                Item {
+                    id: delegateRoot
+                    implicitWidth: pluginRoot._sizeCache[modelData] || Theme.iconSizeSmall
+                    implicitHeight: Theme.iconSizeSmall
+                    anchors.verticalCenter: parent ? parent.verticalCenter : undefined
+
+                    Loader {
+                        id: widgetLoader
+                        readonly property string targetPluginId: modelData
+                        anchors.fill: parent
+                        
+                        sourceComponent: PluginService.pluginWidgetComponents[targetPluginId] || null
+                        
+                        onLoaded: {
+                            if (item) {
+                                if (item.pluginId !== undefined) item.pluginId = targetPluginId;
+                                if (item.pluginService !== undefined) item.pluginService = PluginService;
+                                if (item.popoutService !== undefined) item.popoutService = PopoutService;
+                                if (item.isVertical !== undefined) item.isVertical = false;
+                            }
                         }
                     }
                 }
