@@ -33,6 +33,7 @@ PluginComponent {
     onUsePopoutChanged: updateWidgets()
     property var hiddenPluginIds: []
     property bool _popoutVisible: false
+    property bool _popoutHovered: false
     property real hiddenAreaSize: 0
 
     readonly property int _popoutInternalMargin: Theme.spacingS // From PluginPopout.qml
@@ -53,7 +54,7 @@ PluginComponent {
     property bool isMouseInGlobalZone: false
 
     function updateAnyHovered() {
-        if (isMouseInGlobalZone) {
+        if (isMouseInGlobalZone || _popoutHovered) {
             hoverGraceTimer.stop();
             anyHovered = true;
         } else {
@@ -203,7 +204,7 @@ PluginComponent {
         }
         return 240;
     }
-    popoutHeight: pluginRoot.popoutLayout === "row" ? pluginRoot.barThickness : Math.ceil(hiddenPluginIds.length / 4) * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2
+    popoutHeight: pluginRoot.popoutLayout === "row" ? (pluginRoot.barThickness + 4) : Math.ceil(hiddenPluginIds.length / 4) * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2
 
     popoutContent: Component {
         PopoutComponent {
@@ -211,12 +212,25 @@ PluginComponent {
             showCloseButton: false
             
             Component.onCompleted: pluginRoot._popoutVisible = true
-            Component.onDestruction: pluginRoot._popoutVisible = false
+            Component.onDestruction: {
+                pluginRoot._popoutVisible = false
+                pluginRoot._popoutHovered = false
+            }
 
-            Loader {
+            MouseArea {
                 width: parent.width
-                height: pluginRoot.popoutLayout === "row" ? (pluginRoot.barThickness - pluginRoot._popoutInternalMargin * 2) : undefined
-                sourceComponent: pluginRoot.popoutLayout === "grid" ? gridLayout : rowLayout
+                height: pluginRoot.popoutLayout === "row" ? (pluginRoot.popoutHeight - pluginRoot._popoutInternalMargin * 2) : undefined
+                hoverEnabled: true
+                onContainsMouseChanged: pluginRoot._popoutHovered = containsMouse
+                propagateComposedEvents: true
+                onClicked: (mouse) => mouse.accepted = false
+                onPressed: (mouse) => mouse.accepted = false
+                onReleased: (mouse) => mouse.accepted = false
+
+                Loader {
+                    anchors.fill: parent
+                    sourceComponent: pluginRoot.popoutLayout === "grid" ? gridLayout : rowLayout
+                }
             }
 
             Component {
