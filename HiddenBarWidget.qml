@@ -269,21 +269,55 @@ PluginComponent {
                     implicitWidth: pluginRoot._sizeCache[modelData] || Theme.iconSizeSmall
                     height: pluginRoot.popoutLayout === "row" ? parent.height : Theme.iconSizeSmall
                     
-                    Loader {
-                        id: widgetLoader
-                        readonly property string targetPluginId: modelData
+                    readonly property var originalWidget: {
+                        if (!pluginRoot.parentScreen) return null;
+                        return BarWidgetService.getWidget(modelData, pluginRoot.parentScreen.name);
+                    }
+
+                    DankIcon {
+                        id: proxyIcon
                         anchors.centerIn: parent
-                        width: parent.width
-                        height: Theme.iconSizeSmall
+                        size: Theme.iconSizeSmall
+                        name: delegateRoot.originalWidget ? delegateRoot.originalWidget.icon : "extension"
+                        color: Theme.surfaceText
                         
-                        sourceComponent: PluginService.pluginWidgetComponents[targetPluginId] || null
-                        
-                        onLoaded: {
-                            if (item) {
-                                if (item.pluginId !== undefined) item.pluginId = targetPluginId;
-                                if (item.pluginService !== undefined) item.pluginService = PluginService;
-                                if (item.popoutService !== undefined) item.popoutService = PopoutService;
-                                if (item.isVertical !== undefined) item.isVertical = false;
+                        MouseArea {
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: {
+                                const widget = delegateRoot.originalWidget;
+                                if (!widget) return;
+
+                                // 1. Calculate screen coordinates of this proxy icon
+                                const globalPos = proxyIcon.mapToItem(null, 0, 0);
+                                
+                                // 2. Find the internal popout object of the original widget
+                                let targetPopout = null;
+                                for (let i = 0; i < widget.children.length; i++) {
+                                    const child = widget.children[i];
+                                    if (child.hasOwnProperty("shouldBeVisible") && child.hasOwnProperty("pluginContent")) {
+                                        targetPopout = child;
+                                        break;
+                                    }
+                                }
+
+                                // 3. Close hidden bar popout first
+                                pluginRoot.closePopout();
+
+                                // 4. Trigger the real popout at the proxy's position
+                                if (targetPopout) {
+                                    Qt.callLater(() => {
+                                        const barPosition = pluginRoot.axis?.edge === "left" ? 2 : (pluginRoot.axis?.edge === "right" ? 3 : (pluginRoot.axis?.edge === "top" ? 0 : 1));
+                                        targetPopout.setTriggerPosition(
+                                            globalPos.x, globalPos.y, proxyIcon.width, 
+                                            pluginRoot.section, pluginRoot.parentScreen,
+                                            barPosition, pluginRoot.barThickness, pluginRoot.barSpacing, pluginRoot.barConfig
+                                        );
+                                        targetPopout.open();
+                                    });
+                                } else {
+                                    Qt.callLater(() => widget.triggerPopout());
+                                }
                             }
                         }
                     }
