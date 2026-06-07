@@ -8,7 +8,7 @@ import qs.Services
 import qs.Widgets
 
 PluginComponent {
-    id: root
+    id: pluginRoot
 
     property bool isExpanded: pluginData.startExpanded ?? false
     readonly property bool autoExpand: pluginData.autoExpand ?? true
@@ -32,6 +32,7 @@ PluginComponent {
     readonly property string popoutLayout: pluginData.popoutLayout ?? "row"
     onUsePopoutChanged: updateWidgets()
     property var hiddenPluginIds: []
+    property bool _popoutVisible: false
     property real hiddenAreaSize: 0
     property var _sizeCache: ({
     }) // Cache for widget sizes
@@ -43,7 +44,7 @@ PluginComponent {
             hoverGraceTimer.stop();
             anyHovered = true;
         } else {
-            if (root.isExpanded) {
+            if (pluginRoot.isExpanded) {
                 if (!hoverGraceTimer.running)
                     hoverGraceTimer.restart();
 
@@ -55,47 +56,47 @@ PluginComponent {
 
     function handleHover(hovered) {
         if (hovered) {
-            const isOpened = root.usePopout ? (root.pluginPopout && root.pluginPopout.visible) : root.isExpanded;
-            if (root.autoExpand && !isOpened) {
-                hoverTimer.interval = root.hoverDelay;
+            const isOpened = pluginRoot.usePopout ? pluginRoot._popoutVisible : pluginRoot.isExpanded;
+            if (pluginRoot.autoExpand && !isOpened) {
+                hoverTimer.interval = pluginRoot.hoverDelay;
                 hoverTimer.restart();
             }
             collapseTimer.stop();
         } else {
             hoverTimer.stop();
-            const isOpened = root.usePopout ? (root.pluginPopout && root.pluginPopout.visible) : root.isExpanded;
-            if (isOpened && root.autoCollapse && !root.isPinned)
+            const isOpened = pluginRoot.usePopout ? pluginRoot._popoutVisible : pluginRoot.isExpanded;
+            if (isOpened && pluginRoot.autoCollapse && !pluginRoot.isPinned)
                 collapseTimer.restart();
 
         }
     }
 
     function updateWidgets() {
-        if (!root.parentScreen)
+        if (!pluginRoot.parentScreen)
             return ;
 
-        let myScreen = root.parentScreen.name;
-        let mySection = root.section;
-        if (!root.parent || !root.parent.parent)
+        let myScreen = pluginRoot.parentScreen.name;
+        let mySection = pluginRoot.section;
+        if (!pluginRoot.parent || !pluginRoot.parent.parent)
             return ;
 
-        let myPos = root.isVertical ? root.parent.parent.y : root.parent.parent.x;
+        let myPos = pluginRoot.isVertical ? pluginRoot.parent.parent.y : pluginRoot.parent.parent.x;
         let allIds = BarWidgetService.getRegisteredWidgetIds();
         let candidates = [];
         for (let i = 0; i < allIds.length; i++) {
             let id = allIds[i];
-            if (id === root.pluginId)
+            if (id === pluginRoot.pluginId)
                 continue;
 
-            if (root.excludeTray && (id === "systray" || id.includes("tray")))
+            if (pluginRoot.excludeTray && (id === "systray" || id.includes("tray")))
                 continue;
 
-            if (root.excludeClock && (id === "clock" || id === "time"))
+            if (pluginRoot.excludeClock && (id === "clock" || id === "time"))
                 continue;
 
             let widget = BarWidgetService.getWidget(id, myScreen);
             if (widget && widget.section === mySection && widget.parent && widget.parent.parent) {
-                let widgetPos = root.isVertical ? widget.parent.parent.y : widget.parent.parent.x;
+                let widgetPos = pluginRoot.isVertical ? widget.parent.parent.y : widget.parent.parent.x;
                 let shouldManage = false;
                 if (mySection === "right")
                     shouldManage = (widgetPos < myPos);
@@ -115,28 +116,28 @@ PluginComponent {
         candidates.sort((a, b) => {
             return a.dist - b.dist;
         });
-        let limit = (root.hideCount > 0) ? root.hideCount : candidates.length;
+        let limit = (pluginRoot.hideCount > 0) ? pluginRoot.hideCount : candidates.length;
         let totalSize = 0;
         let newHiddenIds = [];
         for (let j = 0; j < candidates.length; j++) {
             let c = candidates[j];
             let shouldBeHidden = (j < limit);
             if (shouldBeHidden) {
-                if (root.usePopout) {
+                if (pluginRoot.usePopout) {
                     newHiddenIds.push(c.id);
                     if (c.widget.parent)
                         c.widget.parent.visible = false;
                 } else {
                     if (c.widget.parent)
-                        c.widget.parent.visible = root.isExpanded;
+                        c.widget.parent.visible = pluginRoot.isExpanded;
                 }
 
                 // Get size, using cache if current size is 0 (hidden)
-                let currentSize = root.isVertical ? (c.widget.implicitHeight || (c.widget.parent && c.widget.parent.parent ? c.widget.parent.parent.height : 0)) : (c.widget.implicitWidth || (c.widget.parent && c.widget.parent.parent ? c.widget.parent.parent.width : 0));
+                let currentSize = pluginRoot.isVertical ? (c.widget.implicitHeight || (c.widget.parent && c.widget.parent.parent ? c.widget.parent.parent.height : 0)) : (c.widget.implicitWidth || (c.widget.parent && c.widget.parent.parent ? c.widget.parent.parent.width : 0));
                 if (currentSize > 0)
-                    root._sizeCache[c.id] = currentSize;
+                    pluginRoot._sizeCache[c.id] = currentSize;
 
-                let size = currentSize > 0 ? currentSize : (root._sizeCache[c.id] || 0);
+                let size = currentSize > 0 ? currentSize : (pluginRoot._sizeCache[c.id] || 0);
                 if (size > 0)
                     totalSize += size;
 
@@ -146,22 +147,22 @@ PluginComponent {
 
             }
         }
-        root.hiddenPluginIds = newHiddenIds;
+        pluginRoot.hiddenPluginIds = newHiddenIds;
 
         // Cleanup cache for unregistered widgets
-        let cacheKeys = Object.keys(root._sizeCache);
+        let cacheKeys = Object.keys(pluginRoot._sizeCache);
         for (let k = 0; k < cacheKeys.length; k++) {
             if (allIds.indexOf(cacheKeys[k]) === -1)
-                delete root._sizeCache[cacheKeys[k]];
+                delete pluginRoot._sizeCache[cacheKeys[k]];
 
         }
-        if (totalSize > 0 && !root.usePopout) {
+        if (totalSize > 0 && !pluginRoot.usePopout) {
             let newSize = totalSize + Theme.spacingM;
-            if (Math.abs(root.hiddenAreaSize - newSize) > 1)
-                root.hiddenAreaSize = newSize;
+            if (Math.abs(pluginRoot.hiddenAreaSize - newSize) > 1)
+                pluginRoot.hiddenAreaSize = newSize;
 
-        } else if (root.hiddenAreaSize !== 0) {
-            root.hiddenAreaSize = 0;
+        } else if (pluginRoot.hiddenAreaSize !== 0) {
+            pluginRoot.hiddenAreaSize = 0;
         }
     }
 
@@ -170,29 +171,32 @@ PluginComponent {
         updateAnyHovered();
     }
     onAnyHoveredChanged: handleHover(anyHovered)
-    pillClickAction: root.usePopout ? null : function() {
-        root.isExpanded = !root.isExpanded;
-        root.isPinned = false;
+    pillClickAction: pluginRoot.usePopout ? null : function() {
+        pluginRoot.isExpanded = !pluginRoot.isExpanded;
+        pluginRoot.isPinned = false;
         updateWidgets();
         // Only start collapse timer if expanded AND mouse is NOT in zone AND not pinned
-        if (root.isExpanded && root.autoCollapse && !root.anyHovered && !root.isPinned)
+        if (pluginRoot.isExpanded && pluginRoot.autoCollapse && !pluginRoot.anyHovered && !pluginRoot.isPinned)
             collapseTimer.restart();
         else
             collapseTimer.stop();
     }
     verticalBarPill: horizontalBarPill
 
-    popoutWidth: root.popoutLayout === "row" ? Math.max(hiddenPluginIds.length * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2, 60) : 240
-    popoutHeight: root.popoutLayout === "row" ? Theme.iconSizeSmall + Theme.spacingM * 2 : Math.ceil(hiddenPluginIds.length / 4) * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2
+    popoutWidth: pluginRoot.popoutLayout === "row" ? Math.max(hiddenPluginIds.length * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2, 60) : 240
+    popoutHeight: pluginRoot.popoutLayout === "row" ? Theme.iconSizeSmall + Theme.spacingM * 2 : Math.ceil(hiddenPluginIds.length / 4) * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2
 
     popoutContent: Component {
         PopoutComponent {
             headerText: ""
             showCloseButton: false
+            
+            Component.onCompleted: pluginRoot._popoutVisible = true
+            Component.onDestruction: pluginRoot._popoutVisible = false
 
             Loader {
                 width: parent.width
-                sourceComponent: root.popoutLayout === "grid" ? gridLayout : rowLayout
+                sourceComponent: pluginRoot.popoutLayout === "grid" ? gridLayout : rowLayout
             }
 
             Component {
@@ -201,7 +205,7 @@ PluginComponent {
                     spacing: Theme.spacingM
                     padding: Theme.spacingM
                     Repeater {
-                        model: root.hiddenPluginIds
+                        model: pluginRoot.hiddenPluginIds
                         delegate: widgetDelegate
                     }
                 }
@@ -214,7 +218,7 @@ PluginComponent {
                     spacing: Theme.spacingM
                     padding: Theme.spacingM
                     Repeater {
-                        model: root.hiddenPluginIds
+                        model: pluginRoot.hiddenPluginIds
                         delegate: widgetDelegate
                     }
                 }
@@ -247,8 +251,8 @@ PluginComponent {
         interval: 500
         repeat: false
         onTriggered: {
-            if (!root.isMouseInGlobalZone)
-                root.anyHovered = false;
+            if (!pluginRoot.isMouseInGlobalZone)
+                pluginRoot.anyHovered = false;
 
         }
     }
@@ -258,10 +262,12 @@ PluginComponent {
 
         repeat: false
         onTriggered: {
-            if (root.usePopout) {
-                root.triggerPopout();
-            } else if (!root.isExpanded) {
-                root.isExpanded = true;
+            if (pluginRoot.usePopout) {
+                if (!pluginRoot._popoutVisible) {
+                    pluginRoot.triggerPopout();
+                }
+            } else if (!pluginRoot.isExpanded) {
+                pluginRoot.isExpanded = true;
                 updateWidgets();
             }
         }
@@ -270,16 +276,18 @@ PluginComponent {
     Timer {
         id: collapseTimer
 
-        interval: root.collapseDelay
+        interval: pluginRoot.collapseDelay
         repeat: false
         onTriggered: {
             // Safety check: don't collapse if mouse returned to zone
-            if (root.anyHovered) return;
+            if (pluginRoot.anyHovered) return;
 
-            if (root.usePopout) {
-                root.closePopout();
-            } else if (root.isExpanded) {
-                root.isExpanded = false;
+            if (pluginRoot.usePopout) {
+                if (pluginRoot._popoutVisible) {
+                    pluginRoot.closePopout();
+                }
+            } else if (pluginRoot.isExpanded) {
+                pluginRoot.isExpanded = false;
                 updateWidgets();
             }
         }
@@ -287,7 +295,7 @@ PluginComponent {
 
     Connections {
         function onWidgetRegistered(id, screen) {
-            if (root.parentScreen && screen === root.parentScreen.name)
+            if (pluginRoot.parentScreen && screen === pluginRoot.parentScreen.name)
                 reEvalTimer.restart();
 
         }
@@ -305,46 +313,46 @@ PluginComponent {
 
     IpcHandler {
         function toggle() : string {
-            root.isExpanded = !root.isExpanded;
-            root.isPinned = false;
+            pluginRoot.isExpanded = !pluginRoot.isExpanded;
+            pluginRoot.isPinned = false;
             updateWidgets();
-            if (root.isExpanded && root.autoCollapse && !root.anyHovered && !root.isPinned)
+            if (pluginRoot.isExpanded && pluginRoot.autoCollapse && !pluginRoot.anyHovered && !pluginRoot.isPinned)
                 collapseTimer.restart();
             else
                 collapseTimer.stop();
-            return root.isExpanded ? "EXPANDED" : "COLLAPSED";
+            return pluginRoot.isExpanded ? "EXPANDED" : "COLLAPSED";
         }
 
         function expand() : string {
-            if (!root.isExpanded) {
-                root.isExpanded = true;
+            if (!pluginRoot.isExpanded) {
+                pluginRoot.isExpanded = true;
                 updateWidgets();
             }
             return "EXPANDED";
         }
 
         function collapse() : string {
-            if (root.isExpanded) {
-                root.isExpanded = false;
-                root.isPinned = false;
+            if (pluginRoot.isExpanded) {
+                pluginRoot.isExpanded = false;
+                pluginRoot.isPinned = false;
                 updateWidgets();
             }
             return "COLLAPSED";
         }
 
         function pin() : string {
-            if (!root.isExpanded) {
-                root.isExpanded = true;
+            if (!pluginRoot.isExpanded) {
+                pluginRoot.isExpanded = true;
                 updateWidgets();
             }
-            root.isPinned = true;
+            pluginRoot.isPinned = true;
             collapseTimer.stop();
             return "PINNED";
         }
 
         function unpin() : string {
-            root.isPinned = false;
-            if (root.isExpanded && root.autoCollapse && !root.anyHovered)
+            pluginRoot.isPinned = false;
+            if (pluginRoot.isExpanded && pluginRoot.autoCollapse && !pluginRoot.anyHovered)
                 collapseTimer.restart();
 
             return "UNPINNED";
@@ -356,62 +364,62 @@ PluginComponent {
     MouseArea {
         id: triggerZone
 
-        readonly property real baseExpansion: root.extendedTrigger ? Math.max(root.hiddenAreaSize, 200) : 0
-        readonly property real expansion: Math.max(0, baseExpansion + root.triggerAdjustment)
+        readonly property real baseExpansion: pluginRoot.extendedTrigger ? Math.max(pluginRoot.hiddenAreaSize, 200) : 0
+        readonly property real expansion: Math.max(0, baseExpansion + pluginRoot.triggerAdjustment)
 
         hoverEnabled: true
         acceptedButtons: Qt.NoButton
         propagateComposedEvents: true
         cursorShape: Qt.PointingHandCursor
         width: {
-            if (root.isVertical)
-                return root.width;
+            if (pluginRoot.isVertical)
+                return pluginRoot.width;
 
-            return root.width + expansion;
+            return pluginRoot.width + expansion;
         }
         height: {
-            if (!root.isVertical)
-                return root.height;
+            if (!pluginRoot.isVertical)
+                return pluginRoot.height;
 
-            return root.height + expansion;
+            return pluginRoot.height + expansion;
         }
         x: {
-            if (root.isVertical)
+            if (pluginRoot.isVertical)
                 return 0;
 
-            if (root.section === "right")
+            if (pluginRoot.section === "right")
                 return -expansion;
 
-            if (root.section === "center")
+            if (pluginRoot.section === "center")
                 return -expansion / 2;
 
             return 0; // left section
         }
         y: {
-            if (!root.isVertical)
+            if (!pluginRoot.isVertical)
                 return 0;
 
-            if (root.section === "right")
+            if (pluginRoot.section === "right")
                 return -expansion;
 
             // bottom-to-top
-            if (root.section === "center")
+            if (pluginRoot.section === "center")
                 return -expansion / 2;
 
             return 0; // top-to-bottom
         }
         onContainsMouseChanged: {
-            root.isMouseInGlobalZone = containsMouse;
+            pluginRoot.isMouseInGlobalZone = containsMouse;
         }
 
         DropArea {
             anchors.fill: parent
-            enabled: !root.isExpanded
+            enabled: !pluginRoot.isExpanded
             onEntered: {
-                root.isMouseInGlobalZone = true;
+                pluginRoot.isMouseInGlobalZone = true;
             }
             onExited: {
-                root.isMouseInGlobalZone = false;
+                pluginRoot.isMouseInGlobalZone = false;
             }
         }
     }
@@ -419,7 +427,7 @@ PluginComponent {
     Rectangle {
         id: regionPreview
 
-        visible: root.showRegionPreview
+        visible: pluginRoot.showRegionPreview
         x: triggerZone.x
         y: triggerZone.y
         width: triggerZone.width
@@ -442,21 +450,21 @@ PluginComponent {
                 anchors.centerIn: parent
                 size: Theme.iconSizeSmall
                 name: {
-                    if (root.isPinned)
+                    if (pluginRoot.isPinned)
                         return "push_pin";
 
-                    if (root.usePopout)
+                    if (pluginRoot.usePopout)
                         return "expand_less";
 
-                    if (root.section === "right")
-                        return root.isExpanded ? "chevron_left" : "chevron_right";
-                    else if (root.section === "left")
-                        return root.isExpanded ? "chevron_right" : "chevron_left";
-                    return root.isExpanded ? "view-conceal-symbolic" : "view-visible-symbolic";
+                    if (pluginRoot.section === "right")
+                        return pluginRoot.isExpanded ? "chevron_left" : "chevron_right";
+                    else if (pluginRoot.section === "left")
+                        return pluginRoot.isExpanded ? "chevron_right" : "chevron_left";
+                    return pluginRoot.isExpanded ? "view-conceal-symbolic" : "view-visible-symbolic";
                 }
-                rotation: (root.usePopout && root.pluginPopout && root.pluginPopout.visible) ? 180 : 0
+                rotation: (pluginRoot.usePopout && pluginRoot._popoutVisible) ? 180 : 0
                 color: Theme.surfaceText
-                opacity: (root.isExpanded || (root.usePopout && root.pluginPopout && root.pluginPopout.visible)) ? 1 : 0.6
+                opacity: (pluginRoot.isExpanded || (pluginRoot.usePopout && pluginRoot._popoutVisible)) ? 1 : 0.6
 
                 Behavior on opacity {
                     NumberAnimation {
@@ -481,7 +489,7 @@ PluginComponent {
                 height: Theme.spacingXS
                 radius: width / 2
                 color: Theme.primary
-                visible: root.isPinned
+                visible: pluginRoot.isPinned
 
                 anchors {
                     right: parent.right
@@ -497,10 +505,10 @@ PluginComponent {
                 acceptedButtons: Qt.RightButton
                 onClicked: {
                     if (mouse.button === Qt.RightButton) {
-                        if (root.isExpanded)
-                            root.isPinned = !root.isPinned;
+                        if (pluginRoot.isExpanded)
+                            pluginRoot.isPinned = !pluginRoot.isPinned;
                         else
-                            root.isPinned = false;
+                            pluginRoot.isPinned = false;
                     }
                 }
             }
