@@ -41,10 +41,7 @@ PluginSettings {
             defaultValue: false
         }
 
-        Separator {
-            visible: usePopout.value
-            height: visible ? 1 : 0
-        }
+        Separator {}
 
         SelectionSettingPlus {
             id: popoutLayout
@@ -60,8 +57,6 @@ PluginSettings {
             height: visible ? implicitHeight : 0
         }
 
-        Separator {}
-
         ToggleSettingPlus {
             id: startExpanded
             label: I18n.tr("Start expanded")
@@ -71,10 +66,7 @@ PluginSettings {
             height: visible ? implicitHeight : 0
         }
 
-        Separator {
-            visible: !usePopout.value
-            height: visible ? 1 : 0
-        }
+        Separator {}
 
         ToggleSettingPlus {
             id: autoExpand
