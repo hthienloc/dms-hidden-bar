@@ -81,8 +81,6 @@ PluginSettings {
             label: I18n.tr("Auto-expand on hover")
             settingKey: "autoExpand"
             defaultValue: true
-            visible: !usePopout.value
-            height: visible ? implicitHeight : 0
         }
 
         Separator {
