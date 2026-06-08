@@ -41,7 +41,10 @@ PluginSettings {
             defaultValue: false
         }
 
-        Separator {}
+        Separator {
+            visible: popoutLayout.visible || startExpanded.visible
+            height: visible ? 1 : 0
+        }
 
         SelectionSettingPlus {
             id: popoutLayout
@@ -66,7 +69,9 @@ PluginSettings {
             height: visible ? implicitHeight : 0
         }
 
-        Separator {}
+        Separator {
+            visible: true
+        }
 
         ToggleSettingPlus {
             id: autoExpand
