@@ -109,11 +109,6 @@ PluginSettings {
             defaultValue: true
         }
 
-        Separator {
-            visible: autoCollapse.value
-            height: visible ? 1 : 0
-        }
-
         SliderSettingPlus {
             id: collapseDelay
             label: I18n.tr("Collapse delay")
@@ -127,6 +122,29 @@ PluginSettings {
             rightLabel: "10"
             visible: autoCollapse.value
             height: visible ? implicitHeight : 0
+        }
+
+        Separator {
+            visible: autoCollapse.value
+            height: visible ? 1 : 0
+        }
+
+        ToggleSettingPlus {
+            id: hideIconPillWhenCollapsed
+            label: I18n.tr("Hide icon pill when collapsed")
+            description: I18n.tr("Completely hide the trigger icon pill when the bar is collapsed.")
+            settingKey: "hideIconPillWhenCollapsed"
+            defaultValue: false
+        }
+
+        Separator {}
+
+        ToggleSettingPlus {
+            id: hideIconPillWhenExpanded
+            label: I18n.tr("Hide icon pill when expanded (WIP)")
+            description: I18n.tr("Completely hide the trigger icon pill when the bar is expanded.")
+            settingKey: "hideIconPillWhenExpanded"
+            defaultValue: false
         }
     }
 

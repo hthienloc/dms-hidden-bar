@@ -16,6 +16,8 @@ PluginComponent {
     readonly property bool excludeTray: pluginData.excludeTray ?? true
     readonly property bool excludeClock: pluginData.excludeClock ?? true
     readonly property bool autoCollapse: pluginData.autoCollapse ?? true
+    readonly property bool hideIconPillWhenCollapsed: pluginData.hideIconPillWhenCollapsed ?? false
+    readonly property bool hideIconPillWhenExpanded: pluginData.hideIconPillWhenExpanded ?? false
     readonly property int collapseDelay: {
         const val = pluginData.collapseDelay ?? 1;
         return val <= 100 ? val * 1000 : val;
@@ -537,8 +539,16 @@ PluginComponent {
 
     horizontalBarPill: Component {
         Item {
-            implicitWidth: Theme.iconSizeSmall
-            implicitHeight: Theme.iconSizeSmall
+            id: pillRootItem
+
+            readonly property bool isActuallyExpanded: pluginRoot.isExpanded || (pluginRoot.usePopout && pluginRoot._popoutVisible)
+            readonly property bool shouldBeHidden: (pluginRoot.hideIconPillWhenCollapsed && !isActuallyExpanded) || (pluginRoot.hideIconPillWhenExpanded && isActuallyExpanded)
+
+            implicitWidth: shouldBeHidden ? 0 : Theme.iconSizeSmall
+            implicitHeight: shouldBeHidden ? 0 : Theme.iconSizeSmall
+            visible: opacity > 0
+            opacity: shouldBeHidden ? 0 : (isActuallyExpanded ? 1 : 0.6)
+            clip: true
 
             DankIcon {
                 id: pillIcon
@@ -560,15 +570,6 @@ PluginComponent {
                 }
                 rotation: (pluginRoot.usePopout && pluginRoot._popoutVisible) ? 180 : 0
                 color: Theme.surfaceText
-                opacity: (pluginRoot.isExpanded || (pluginRoot.usePopout && pluginRoot._popoutVisible)) ? 1 : 0.6
-
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: 200
-                    }
-
-                }
-
             }
 
             Rectangle {
