@@ -35,7 +35,7 @@ PluginSettings {
 
         ToggleSettingPlus {
             id: usePopout
-            label: I18n.tr("Use Popout Overflow")
+            label: I18n.tr("Use Popout Overflow (WIP)")
             description: I18n.tr("Show hidden plugins in a separate popout menu instead of expanding the status bar.")
             settingKey: "usePopout"
             defaultValue: false
@@ -141,7 +141,7 @@ PluginSettings {
 
         ToggleSettingPlus {
             id: hideIconPillWhenExpanded
-            label: I18n.tr("Hide icon pill when expanded (WIP)")
+            label: I18n.tr("Hide icon pill when expanded")
             description: I18n.tr("Completely hide the trigger icon pill when the bar is expanded.")
             settingKey: "hideIconPillWhenExpanded"
             defaultValue: false
