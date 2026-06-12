@@ -35,9 +35,11 @@ PluginComponent {
     readonly property int popoutWidthAdjustment: pluginData.popoutWidthAdjustment ?? 48
     readonly property int popoutHeightAdjustment: pluginData.popoutHeightAdjustment ?? 6
     onUsePopoutChanged: updateWidgets()
+    onForcedVisiblePluginIdChanged: updateWidgets()
     property var hiddenPluginIds: []
     property bool _popoutVisible: false
     property bool _popoutHovered: false
+    property string forcedVisiblePluginId: ""
     property real hiddenAreaSize: 0
 
     readonly property int _popoutInternalMargin: Theme.spacingS // From PluginPopout.qml
@@ -161,12 +163,13 @@ PluginComponent {
             let c = candidates[j];
             let shouldBeHidden = newHiddenIds.indexOf(c.id) !== -1;
             if (shouldBeHidden) {
+                let forceShow = (c.id === pluginRoot.forcedVisiblePluginId);
                 if (pluginRoot.usePopout) {
                     if (c.widget.parent)
-                        c.widget.parent.visible = false;
+                        c.widget.parent.visible = forceShow;
                 } else {
                     if (c.widget.parent)
-                        c.widget.parent.visible = pluginRoot.isExpanded;
+                        c.widget.parent.visible = forceShow || pluginRoot.isExpanded;
                 }
 
                 // Get size, using cache if current size is 0 (hidden)
@@ -350,30 +353,20 @@ PluginComponent {
                                         }
 
                                         // 3. Trigger handoff: Update coordinates and open
-                                        // We DON'T manually close our own popout; calling targetPopout.open() 
-                                        // will trigger PopoutManager.requestPopout, which handles the swap safely.
-                                         if (targetPopout) {
-                                             if (targetPopout.parent !== pluginRoot.parent) {
-                                                 const originalParent = targetPopout.parent;
-                                                 targetPopout.parent = pluginRoot.parent;
-                                                 
-                                                 let connection = null;
-                                                 connection = targetPopout.popoutClosed.connect(function() {
-                                                     if (targetPopout && originalParent) {
-                                                         targetPopout.parent = originalParent;
-                                                     }
-                                                     if (connection) {
-                                                         connection.disconnect();
-                                                     }
-                                                 });
-                                             }
+                                        if (targetPopout) {
+                                             pluginRoot.forcedVisiblePluginId = original.pluginId;
+                                             
+                                             let connection = null;
+                                             connection = targetPopout.popoutClosed.connect(function() {
+                                                 pluginRoot.forcedVisiblePluginId = "";
+                                                 if (connection) {
+                                                     connection.disconnect();
+                                                 }
+                                             });
 
-                                             targetPopout.setTriggerPosition(
-                                                 pos.x, pos.y, pos.width, 
-                                                 pluginRoot.section, currentScreen,
-                                                 barPosition, pluginRoot.barThickness, pluginRoot.barSpacing, pluginRoot.barConfig
-                                             );
-                                             targetPopout.open();
+                                             Qt.callLater(function() {
+                                                 original.triggerPopout();
+                                             });
                                          } else {
                                              original.triggerPopout();
                                          }
