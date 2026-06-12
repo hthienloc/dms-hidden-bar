@@ -35,11 +35,9 @@ PluginComponent {
     readonly property int popoutWidthAdjustment: pluginData.popoutWidthAdjustment ?? 48
     readonly property int popoutHeightAdjustment: pluginData.popoutHeightAdjustment ?? 6
     onUsePopoutChanged: updateWidgets()
-    onForcedVisiblePluginIdChanged: updateWidgets()
     property var hiddenPluginIds: []
     property bool _popoutVisible: false
     property bool _popoutHovered: false
-    property string forcedVisiblePluginId: ""
     property real hiddenAreaSize: 0
 
     readonly property int _popoutInternalMargin: Theme.spacingS // From PluginPopout.qml
@@ -163,13 +161,12 @@ PluginComponent {
             let c = candidates[j];
             let shouldBeHidden = newHiddenIds.indexOf(c.id) !== -1;
             if (shouldBeHidden) {
-                let forceShow = (c.id === pluginRoot.forcedVisiblePluginId);
                 if (pluginRoot.usePopout) {
                     if (c.widget.parent)
-                        c.widget.parent.visible = forceShow;
+                        c.widget.parent.visible = false;
                 } else {
                     if (c.widget.parent)
-                        c.widget.parent.visible = forceShow || pluginRoot.isExpanded;
+                        c.widget.parent.visible = pluginRoot.isExpanded;
                 }
 
                 // Get size, using cache if current size is 0 (hidden)
@@ -332,45 +329,6 @@ PluginComponent {
                                 if (item.pluginService !== undefined) item.pluginService = PluginService;
                                 if (item.popoutService !== undefined) item.popoutService = PopoutService;
                                 if (item.isVertical !== undefined) item.isVertical = false;
-
-                                // 2. Proxy Click Logic: Override click to trigger the REAL plugin
-                                const original = delegateRoot.originalWidget;
-                                if (original && "pillClickAction" in item) {
-                                    item.pillClickAction = function() {
-                                        // 1. Get accurate position from the MAIN BAR context
-                                        const pos = pluginRoot.getMainPillScreenPos();
-                                        const currentScreen = pluginRoot.parentScreen; // Use plugin's assigned screen
-                                        const barPosition = (pluginRoot.axis ? pluginRoot.axis.edge : "") === "left" ? 2 : ((pluginRoot.axis ? pluginRoot.axis.edge : "") === "right" ? 3 : ((pluginRoot.axis ? pluginRoot.axis.edge : "") === "top" ? 0 : 1));
-                                        
-                                        // 2. Find original's popout object
-                                        let targetPopout = null;
-                                        for (let i = 0; i < original.children.length; i++) {
-                                            const child = original.children[i];
-                                            if ("shouldBeVisible" in child && "pluginContent" in child) {
-                                                targetPopout = child;
-                                                break;
-                                            }
-                                        }
-
-                                        // 3. Trigger handoff: Update coordinates and open
-                                         if (targetPopout) {
-                                             pluginRoot.forcedVisiblePluginId = original.pluginId;
-                                             
-                                             let connection = null;
-                                             connection = targetPopout.popoutClosed.connect(function() {
-                                                 pluginRoot.forcedVisiblePluginId = "";
-                                                 if (connection) {
-                                                     connection.disconnect();
-                                                 }
-                                             });
-
-                                             triggerDelayTimer.targetOriginal = original;
-                                             triggerDelayTimer.restart();
-                                         } else {
-                                             original.triggerPopout();
-                                         }
-                                    }
-                                }
                             }
                         }
                     }
@@ -445,17 +403,7 @@ PluginComponent {
         onTriggered: updateWidgets()
     }
 
-    Timer {
-        id: triggerDelayTimer
-        interval: 100
-        repeat: false
-        property var targetOriginal: null
-        onTriggered: {
-            if (targetOriginal) {
-                targetOriginal.triggerPopout();
-            }
-        }
-    }
+
 
     IpcHandler {
         function toggle() : string {

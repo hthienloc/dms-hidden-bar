@@ -43,7 +43,7 @@ PluginSettings {
 
         StyledText {
             visible: usePopout.value
-            text: "⚠️ " + I18n.tr("Recommendation: Disable 'Auto-collapse' when using Popout mode as it is currently unstable.")
+            text: "⚠️ " + I18n.tr("Recommendation: Disable 'Auto-collapse' when using Popout mode as it is currently unstable. Avoid placing widgets with their own popouts (e.g., system tray, network/bluetooth) inside the hidden bar when Popout mode is active.")
             color: Theme.error
             font.pixelSize: Theme.fontSizeSmall
             font.weight: Font.Medium
