@@ -35,7 +35,7 @@ PluginSettings {
 
         ToggleSettingPlus {
             id: usePopout
-            label: I18n.tr("Use Popout Overflow (WIP)")
+            label: I18n.tr("Use Popout Overflow")
             description: I18n.tr("Show hidden plugins in a separate popout menu instead of expanding the status bar.")
             settingKey: "usePopout"
             defaultValue: false
