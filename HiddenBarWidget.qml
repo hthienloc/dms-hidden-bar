@@ -33,6 +33,7 @@ PluginComponent {
     readonly property bool usePopout: pluginData.usePopout ?? false
     readonly property string popoutLayout: pluginData.popoutLayout ?? "row"
     readonly property int popoutWidthAdjustment: pluginData.popoutWidthAdjustment ?? 0
+    readonly property int popoutHeightAdjustment: pluginData.popoutHeightAdjustment ?? 0
     onUsePopoutChanged: updateWidgets()
     property var hiddenPluginIds: []
     property bool _popoutVisible: false
@@ -245,7 +246,10 @@ PluginComponent {
         }
         return 240;
     }
-    popoutHeight: pluginRoot.popoutLayout === "row" ? (pluginRoot.barThickness + Theme.spacingS * 2) : Math.ceil(hiddenPluginIds.length / 4) * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2
+    popoutHeight: {
+        let baseHeight = pluginRoot.popoutLayout === "row" ? (pluginRoot.barThickness + Theme.spacingS * 2) : Math.ceil(hiddenPluginIds.length / 4) * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2;
+        return Math.max(40, baseHeight + pluginRoot.popoutHeightAdjustment);
+    }
 
     popoutContent: Component {
         PopoutComponent {

@@ -101,6 +101,33 @@ PluginSettings {
             }
         }
 
+        Separator {
+            visible: popoutHeightAdjustment.visible
+            height: visible ? 1 : 0
+        }
+
+        SliderSettingPlus {
+            id: popoutHeightAdjustment
+            label: I18n.tr("Popout height adjustment")
+            description: I18n.tr("Fine-tune the popout height.")
+            settingKey: "popoutHeightAdjustment"
+            defaultValue: 0
+            minimum: -150
+            maximum: 150
+            unit: "px"
+            leftLabel: "-150"
+            rightLabel: "150"
+            visible: usePopout.value
+            height: visible ? implicitHeight : 0
+
+            onValueChanged: {
+                let widget = BarWidgetService.getWidgetOnFocusedScreen("hidden-bar");
+                if (widget && typeof widget.openPopout === "function") {
+                    widget.openPopout();
+                }
+            }
+        }
+
         ToggleSettingPlus {
             id: startExpanded
             label: I18n.tr("Start expanded")
