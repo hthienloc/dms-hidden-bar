@@ -136,7 +136,8 @@ PluginComponent {
                     candidates.push({
                     "id": id,
                     "widget": widget,
-                    "dist": Math.abs(widgetPos - myPos)
+                    "dist": Math.abs(widgetPos - myPos),
+                    "pos": widgetPos
                 });
 
             }
@@ -145,14 +146,20 @@ PluginComponent {
             return a.dist - b.dist;
         });
         let limit = (pluginRoot.hideCount > 0) ? pluginRoot.hideCount : candidates.length;
-        let totalSize = 0;
+        let hiddenCandidates = candidates.slice(0, limit);
+        hiddenCandidates.sort((a, b) => {
+            return a.pos - b.pos;
+        });
         let newHiddenIds = [];
+        for (let k = 0; k < hiddenCandidates.length; k++) {
+            newHiddenIds.push(hiddenCandidates[k].id);
+        }
+        let totalSize = 0;
         for (let j = 0; j < candidates.length; j++) {
             let c = candidates[j];
-            let shouldBeHidden = (j < limit);
+            let shouldBeHidden = newHiddenIds.indexOf(c.id) !== -1;
             if (shouldBeHidden) {
                 if (pluginRoot.usePopout) {
-                    newHiddenIds.push(c.id);
                     if (c.widget.parent)
                         c.widget.parent.visible = false;
                 } else {
