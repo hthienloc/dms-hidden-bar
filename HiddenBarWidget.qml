@@ -161,7 +161,7 @@ PluginComponent {
                 }
 
                 // Get size, using cache if current size is 0 (hidden)
-                let currentSize = pluginRoot.isVertical ? (c.widget.implicitHeight || (c.widget.parent && c.widget.parent.parent ? c.widget.parent.parent.height : 0)) : (c.widget.implicitWidth || (c.widget.parent && c.widget.parent.parent ? c.widget.parent.parent.width : 0));
+                let currentSize = pluginRoot.isVertical ? (c.widget.height || c.widget.implicitHeight || (c.widget.parent && c.widget.parent.parent ? c.widget.parent.parent.height : 0)) : (c.widget.width || c.widget.implicitWidth || (c.widget.parent && c.widget.parent.parent ? c.widget.parent.parent.width : 0));
                 if (currentSize > 0)
                     pluginRoot._sizeCache[c.id] = currentSize;
 
@@ -277,7 +277,7 @@ PluginComponent {
                 id: widgetDelegate
                 Item {
                     id: delegateRoot
-                    implicitWidth: pluginRoot._sizeCache[modelData] || Theme.iconSizeSmall
+                    implicitWidth: (widgetLoader.item && widgetLoader.item.width > 0) ? widgetLoader.item.width : (pluginRoot._sizeCache[modelData] || Theme.iconSizeSmall)
                     height: parent.height
                     anchors.verticalCenter: parent.verticalCenter
                     
@@ -303,7 +303,7 @@ PluginComponent {
 
                                 // 2. Proxy Click Logic: Override click to trigger the REAL plugin
                                 const original = delegateRoot.originalWidget;
-                                if (original && item.hasOwnProperty("pillClickAction")) {
+                                if (original && "pillClickAction" in item) {
                                     item.pillClickAction = function() {
                                         // 1. Get accurate position from the MAIN BAR context
                                         const pos = pluginRoot.getMainPillScreenPos();
@@ -314,7 +314,7 @@ PluginComponent {
                                         let targetPopout = null;
                                         for (let i = 0; i < original.children.length; i++) {
                                             const child = original.children[i];
-                                            if (child.hasOwnProperty("shouldBeVisible") && child.hasOwnProperty("pluginContent")) {
+                                            if ("shouldBeVisible" in child && "pluginContent" in child) {
                                                 targetPopout = child;
                                                 break;
                                             }
