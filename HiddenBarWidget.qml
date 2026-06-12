@@ -352,16 +352,31 @@ PluginComponent {
                                         // 3. Trigger handoff: Update coordinates and open
                                         // We DON'T manually close our own popout; calling targetPopout.open() 
                                         // will trigger PopoutManager.requestPopout, which handles the swap safely.
-                                        if (targetPopout) {
-                                            targetPopout.setTriggerPosition(
-                                                pos.x, pos.y, pos.width, 
-                                                pluginRoot.section, currentScreen,
-                                                barPosition, pluginRoot.barThickness, pluginRoot.barSpacing, pluginRoot.barConfig
-                                            );
-                                            targetPopout.open();
-                                        } else {
-                                            original.triggerPopout();
-                                        }
+                                         if (targetPopout) {
+                                             if (targetPopout.parent !== pluginRoot.parent) {
+                                                 const originalParent = targetPopout.parent;
+                                                 targetPopout.parent = pluginRoot.parent;
+                                                 
+                                                 let connection = null;
+                                                 connection = targetPopout.popoutClosed.connect(function() {
+                                                     if (targetPopout && originalParent) {
+                                                         targetPopout.parent = originalParent;
+                                                     }
+                                                     if (connection) {
+                                                         connection.disconnect();
+                                                     }
+                                                 });
+                                             }
+
+                                             targetPopout.setTriggerPosition(
+                                                 pos.x, pos.y, pos.width, 
+                                                 pluginRoot.section, currentScreen,
+                                                 barPosition, pluginRoot.barThickness, pluginRoot.barSpacing, pluginRoot.barConfig
+                                             );
+                                             targetPopout.open();
+                                         } else {
+                                             original.triggerPopout();
+                                         }
                                     }
                                 }
                             }
