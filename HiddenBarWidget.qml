@@ -203,16 +203,6 @@ PluginComponent {
         }
     }
 
-    function openPopout() {
-        for (let i = 0; i < pluginRoot.children.length; i++) {
-            let child = pluginRoot.children[i];
-            if (child && "_primeContent" in child) {
-                child.open();
-                break;
-            }
-        }
-    }
-
     Component.onCompleted: {
         reEvalTimer.restart();
         for (let i = 0; i < pluginRoot.children.length; i++) {
@@ -246,15 +236,16 @@ PluginComponent {
         }
         return 240;
     }
-    popoutHeight: {
-        let baseHeight = pluginRoot.popoutLayout === "row" ? (pluginRoot.barThickness + Theme.spacingS * 2) : Math.ceil(hiddenPluginIds.length / 4) * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2;
-        return Math.max(40, baseHeight + pluginRoot.popoutHeightAdjustment);
-    }
+    popoutHeight: pluginRoot.popoutLayout === "row" ? (pluginRoot.barThickness + Theme.spacingS * 2) : Math.ceil(hiddenPluginIds.length / 4) * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2
 
     popoutContent: Component {
         PopoutComponent {
             headerText: ""
             showCloseButton: false
+            implicitHeight: {
+                let baseH = pluginRoot.popoutLayout === "row" ? pluginRoot.barThickness : Math.ceil(hiddenPluginIds.length / 4) * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2;
+                return Math.max(40, baseH + pluginRoot.popoutHeightAdjustment);
+            }
             
             Component.onCompleted: pluginRoot._popoutVisible = true
             Component.onDestruction: {
@@ -264,7 +255,7 @@ PluginComponent {
 
             MouseArea {
                 width: parent.width
-                height: pluginRoot.popoutLayout === "row" ? pluginRoot.barThickness : undefined
+                height: parent.height
                 hoverEnabled: true
                 onContainsMouseChanged: pluginRoot._popoutHovered = containsMouse
                 propagateComposedEvents: true
