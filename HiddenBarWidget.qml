@@ -202,6 +202,16 @@ PluginComponent {
         }
     }
 
+    function openPopout() {
+        for (let i = 0; i < pluginRoot.children.length; i++) {
+            let child = pluginRoot.children[i];
+            if (child && "_primeContent" in child) {
+                child.open();
+                break;
+            }
+        }
+    }
+
     Component.onCompleted: {
         reEvalTimer.restart();
         for (let i = 0; i < pluginRoot.children.length; i++) {

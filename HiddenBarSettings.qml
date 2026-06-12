@@ -92,6 +92,13 @@ PluginSettings {
             rightLabel: "150"
             visible: usePopout.value && popoutLayout.value === "row"
             height: visible ? implicitHeight : 0
+
+            onValueChanged: {
+                let widget = BarWidgetService.getWidgetOnFocusedScreen("hidden-bar");
+                if (widget && typeof widget.openPopout === "function") {
+                    widget.openPopout();
+                }
+            }
         }
 
         ToggleSettingPlus {
