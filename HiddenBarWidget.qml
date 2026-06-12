@@ -259,6 +259,14 @@ PluginComponent {
                 onContainsMouseChanged: pluginRoot._popoutHovered = containsMouse
                 propagateComposedEvents: true
 
+                Rectangle {
+                    anchors.fill: parent
+                    color: Theme.surfaceVariant
+                    opacity: 0.5
+                    radius: Theme.cornerRadius
+                    z: -1
+                }
+
                 Loader {
                     anchors.fill: parent
                     sourceComponent: pluginRoot.popoutLayout === "grid" ? gridLayout : rowLayout
