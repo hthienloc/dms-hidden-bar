@@ -30,6 +30,7 @@ PluginComponent {
     readonly property int hideCount: pluginData.hideCount ?? 0
     readonly property bool showRegionPreview: pluginData.showRegionPreview ?? false
     readonly property int triggerAdjustment: pluginData.triggerAdjustment ?? 0
+    readonly property int triggerOffset: pluginData.triggerOffset ?? 0
     readonly property bool usePopout: pluginData.usePopout ?? false
     readonly property string popoutLayout: pluginData.popoutLayout ?? "row"
     readonly property int popoutWidthAdjustment: pluginData.popoutWidthAdjustment ?? 48
@@ -481,26 +482,25 @@ PluginComponent {
             if (pluginRoot.isVertical)
                 return 0;
 
+            let base_x = 0;
             if (pluginRoot.section === "right")
-                return -expansion;
+                base_x = -expansion;
+            else if (pluginRoot.section === "center")
+                base_x = -expansion / 2;
 
-            if (pluginRoot.section === "center")
-                return -expansion / 2;
-
-            return 0; // left section
+            return base_x + pluginRoot.triggerOffset;
         }
         y: {
             if (!pluginRoot.isVertical)
                 return 0;
 
+            let base_y = 0;
             if (pluginRoot.section === "right")
-                return -expansion;
+                base_y = -expansion;
+            else if (pluginRoot.section === "center")
+                base_y = -expansion / 2;
 
-            // bottom-to-top
-            if (pluginRoot.section === "center")
-                return -expansion / 2;
-
-            return 0; // top-to-bottom
+            return base_y + pluginRoot.triggerOffset;
         }
         onContainsMouseChanged: {
             pluginRoot.isMouseInGlobalZone = containsMouse;

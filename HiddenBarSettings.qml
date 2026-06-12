@@ -207,11 +207,12 @@ PluginSettings {
         SectionTitle { 
             text: I18n.tr("Trigger Zone")
             icon: "ads_click" 
-            showReset: extendedTrigger.isDirty || showRegionPreview.isDirty || triggerAdjustment.isDirty
+            showReset: extendedTrigger.isDirty || showRegionPreview.isDirty || triggerAdjustment.isDirty || triggerOffset.isDirty
             onResetClicked: {
                 extendedTrigger.resetToDefault();
                 showRegionPreview.resetToDefault();
                 triggerAdjustment.resetToDefault();
+                triggerOffset.resetToDefault();
             }
         }
 
@@ -246,6 +247,21 @@ PluginSettings {
             unit: "px"
             leftLabel: "-150"
             rightLabel: "500"
+        }
+
+        Separator {}
+
+        SliderSettingPlus {
+            id: triggerOffset
+            label: I18n.tr("Trigger area position offset")
+            description: I18n.tr("Shift the trigger zone position along the bar axis. Positive values shift right/down, negative values shift left/up.")
+            settingKey: "triggerOffset"
+            defaultValue: 0
+            minimum: -250
+            maximum: 250
+            unit: "px"
+            leftLabel: "-250"
+            rightLabel: "250"
         }
     }
 
