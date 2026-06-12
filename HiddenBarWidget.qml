@@ -242,10 +242,6 @@ PluginComponent {
         PopoutComponent {
             headerText: ""
             showCloseButton: false
-            implicitHeight: {
-                let baseH = pluginRoot.popoutLayout === "row" ? pluginRoot.barThickness : Math.ceil(hiddenPluginIds.length / 4) * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2;
-                return Math.max(40, baseH + pluginRoot.popoutHeightAdjustment);
-            }
             
             Component.onCompleted: pluginRoot._popoutVisible = true
             Component.onDestruction: {
@@ -255,7 +251,10 @@ PluginComponent {
 
             MouseArea {
                 width: parent.width
-                height: parent.height
+                height: {
+                    let baseH = pluginRoot.popoutLayout === "row" ? pluginRoot.barThickness : Math.ceil(hiddenPluginIds.length / 4) * (Theme.iconSizeSmall + Theme.spacingM) + Theme.spacingM * 2;
+                    return Math.max(40, baseH + pluginRoot.popoutHeightAdjustment);
+                }
                 hoverEnabled: true
                 onContainsMouseChanged: pluginRoot._popoutHovered = containsMouse
                 propagateComposedEvents: true
