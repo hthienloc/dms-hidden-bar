@@ -353,7 +353,7 @@ PluginComponent {
                                         }
 
                                         // 3. Trigger handoff: Update coordinates and open
-                                        if (targetPopout) {
+                                         if (targetPopout) {
                                              pluginRoot.forcedVisiblePluginId = original.pluginId;
                                              
                                              let connection = null;
@@ -364,9 +364,8 @@ PluginComponent {
                                                  }
                                              });
 
-                                             Qt.callLater(function() {
-                                                 original.triggerPopout();
-                                             });
+                                             triggerDelayTimer.targetOriginal = original;
+                                             triggerDelayTimer.restart();
                                          } else {
                                              original.triggerPopout();
                                          }
@@ -444,6 +443,18 @@ PluginComponent {
         interval: 100
         repeat: false
         onTriggered: updateWidgets()
+    }
+
+    Timer {
+        id: triggerDelayTimer
+        interval: 100
+        repeat: false
+        property var targetOriginal: null
+        onTriggered: {
+            if (targetOriginal) {
+                targetOriginal.triggerPopout();
+            }
+        }
     }
 
     IpcHandler {
