@@ -245,25 +245,25 @@ PluginSettings {
             settingKey: "triggerAdjustment"
             defaultValue: 0
             minimum: -150
-            maximum: 500
+            maximum: 150
             unit: "px"
             leftLabel: "-150"
-            rightLabel: "500"
+            rightLabel: "150"
         }
 
         Separator {}
 
         SliderSettingPlus {
             id: triggerOffset
-            label: I18n.tr("Trigger area position offset")
+            label: I18n.tr("Trigger area X offset")
             description: I18n.tr("Shift the trigger zone position along the bar axis. Positive values shift right/down, negative values shift left/up.")
             settingKey: "triggerOffset"
             defaultValue: 0
-            minimum: -250
-            maximum: 250
+            minimum: -100
+            maximum: 100
             unit: "px"
-            leftLabel: "-250"
-            rightLabel: "250"
+            leftLabel: "-100"
+            rightLabel: "100"
         }
 
         Separator {}
@@ -274,11 +274,11 @@ PluginSettings {
             description: I18n.tr("Adjust the height (thickness) of the trigger area perpendicular to the bar.")
             settingKey: "triggerHeightAdjustment"
             defaultValue: 0
-            minimum: -50
-            maximum: 150
+            minimum: -30
+            maximum: 30
             unit: "px"
-            leftLabel: "-50"
-            rightLabel: "150"
+            leftLabel: "-30"
+            rightLabel: "30"
         }
 
         Separator {}
@@ -289,11 +289,11 @@ PluginSettings {
             description: I18n.tr("Shift the trigger zone position perpendicular to the bar axis. Positive values shift down/right, negative values shift up/left.")
             settingKey: "triggerYOffset"
             defaultValue: 0
-            minimum: -150
-            maximum: 150
+            minimum: -40
+            maximum: 40
             unit: "px"
-            leftLabel: "-150"
-            rightLabel: "150"
+            leftLabel: "-40"
+            rightLabel: "40"
         }
     }
 
