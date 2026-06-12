@@ -207,12 +207,14 @@ PluginSettings {
         SectionTitle { 
             text: I18n.tr("Trigger Zone")
             icon: "ads_click" 
-            showReset: extendedTrigger.isDirty || showRegionPreview.isDirty || triggerAdjustment.isDirty || triggerOffset.isDirty
+            showReset: extendedTrigger.isDirty || showRegionPreview.isDirty || triggerAdjustment.isDirty || triggerOffset.isDirty || triggerHeightAdjustment.isDirty || triggerYOffset.isDirty
             onResetClicked: {
                 extendedTrigger.resetToDefault();
                 showRegionPreview.resetToDefault();
                 triggerAdjustment.resetToDefault();
                 triggerOffset.resetToDefault();
+                triggerHeightAdjustment.resetToDefault();
+                triggerYOffset.resetToDefault();
             }
         }
 
@@ -262,6 +264,36 @@ PluginSettings {
             unit: "px"
             leftLabel: "-250"
             rightLabel: "250"
+        }
+
+        Separator {}
+
+        SliderSettingPlus {
+            id: triggerHeightAdjustment
+            label: I18n.tr("Trigger area height adjustment")
+            description: I18n.tr("Adjust the height (thickness) of the trigger area perpendicular to the bar.")
+            settingKey: "triggerHeightAdjustment"
+            defaultValue: 0
+            minimum: -50
+            maximum: 150
+            unit: "px"
+            leftLabel: "-50"
+            rightLabel: "150"
+        }
+
+        Separator {}
+
+        SliderSettingPlus {
+            id: triggerYOffset
+            label: I18n.tr("Trigger area Y offset")
+            description: I18n.tr("Shift the trigger zone position perpendicular to the bar axis. Positive values shift down/right, negative values shift up/left.")
+            settingKey: "triggerYOffset"
+            defaultValue: 0
+            minimum: -150
+            maximum: 150
+            unit: "px"
+            leftLabel: "-150"
+            rightLabel: "150"
         }
     }
 

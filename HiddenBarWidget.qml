@@ -31,6 +31,8 @@ PluginComponent {
     readonly property bool showRegionPreview: pluginData.showRegionPreview ?? false
     readonly property int triggerAdjustment: pluginData.triggerAdjustment ?? 0
     readonly property int triggerOffset: pluginData.triggerOffset ?? 0
+    readonly property int triggerHeightAdjustment: pluginData.triggerHeightAdjustment ?? 0
+    readonly property int triggerYOffset: pluginData.triggerYOffset ?? 0
     readonly property bool usePopout: pluginData.usePopout ?? false
     readonly property string popoutLayout: pluginData.popoutLayout ?? "row"
     readonly property int popoutWidthAdjustment: pluginData.popoutWidthAdjustment ?? 48
@@ -468,19 +470,19 @@ PluginComponent {
         cursorShape: Qt.PointingHandCursor
         width: {
             if (pluginRoot.isVertical)
-                return pluginRoot.width;
+                return pluginRoot.width + pluginRoot.triggerHeightAdjustment;
 
             return pluginRoot.width + expansion;
         }
         height: {
             if (!pluginRoot.isVertical)
-                return pluginRoot.height;
+                return pluginRoot.height + pluginRoot.triggerHeightAdjustment;
 
             return pluginRoot.height + expansion;
         }
         x: {
             if (pluginRoot.isVertical)
-                return 0;
+                return pluginRoot.triggerYOffset;
 
             let base_x = 0;
             if (pluginRoot.section === "right")
@@ -492,7 +494,7 @@ PluginComponent {
         }
         y: {
             if (!pluginRoot.isVertical)
-                return 0;
+                return pluginRoot.triggerYOffset;
 
             let base_y = 0;
             if (pluginRoot.section === "right")
