@@ -84,7 +84,7 @@ PluginSettings {
             label: I18n.tr("Popout width adjustment")
             description: I18n.tr("Fine-tune the horizontal popout width.")
             settingKey: "popoutWidthAdjustment"
-            defaultValue: 0
+            defaultValue: 48
             minimum: -150
             maximum: 150
             unit: "px"
@@ -104,7 +104,7 @@ PluginSettings {
             label: I18n.tr("Popout height adjustment")
             description: I18n.tr("Fine-tune the popout height.")
             settingKey: "popoutHeightAdjustment"
-            defaultValue: 0
+            defaultValue: 6
             minimum: -150
             maximum: 150
             unit: "px"

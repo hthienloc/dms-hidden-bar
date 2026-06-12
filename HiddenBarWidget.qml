@@ -32,8 +32,8 @@ PluginComponent {
     readonly property int triggerAdjustment: pluginData.triggerAdjustment ?? 0
     readonly property bool usePopout: pluginData.usePopout ?? false
     readonly property string popoutLayout: pluginData.popoutLayout ?? "row"
-    readonly property int popoutWidthAdjustment: pluginData.popoutWidthAdjustment ?? 0
-    readonly property int popoutHeightAdjustment: pluginData.popoutHeightAdjustment ?? 0
+    readonly property int popoutWidthAdjustment: pluginData.popoutWidthAdjustment ?? 48
+    readonly property int popoutHeightAdjustment: pluginData.popoutHeightAdjustment ?? 6
     onUsePopoutChanged: updateWidgets()
     property var hiddenPluginIds: []
     property bool _popoutVisible: false
