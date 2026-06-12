@@ -80,7 +80,7 @@ PluginComponent {
         
         const globalPos = pill.visualContent.mapToItem(null, 0, 0);
         const currentScreen = parentScreen || Screen;
-        const barPosition = axis?.edge === "left" ? 2 : (axis?.edge === "right" ? 3 : (axis?.edge === "top" ? 0 : 1));
+        const barPosition = (axis ? axis.edge : "") === "left" ? 2 : ((axis ? axis.edge : "") === "right" ? 3 : ((axis ? axis.edge : "") === "top" ? 0 : 1));
         return SettingsData.getPopupTriggerPosition(globalPos, currentScreen, barThickness, pill.visualWidth, barSpacing, barPosition, barConfig);
     }
 
@@ -330,7 +330,7 @@ PluginComponent {
                                         // 1. Get accurate position from the MAIN BAR context
                                         const pos = pluginRoot.getMainPillScreenPos();
                                         const currentScreen = pluginRoot.parentScreen; // Use plugin's assigned screen
-                                        const barPosition = pluginRoot.axis?.edge === "left" ? 2 : (pluginRoot.axis?.edge === "right" ? 3 : (pluginRoot.axis?.edge === "top" ? 0 : 1));
+                                        const barPosition = (pluginRoot.axis ? pluginRoot.axis.edge : "") === "left" ? 2 : ((pluginRoot.axis ? pluginRoot.axis.edge : "") === "right" ? 3 : ((pluginRoot.axis ? pluginRoot.axis.edge : "") === "top" ? 0 : 1));
                                         
                                         // 2. Find original's popout object
                                         let targetPopout = null;
