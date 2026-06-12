@@ -74,6 +74,26 @@ PluginSettings {
             height: visible ? implicitHeight : 0
         }
 
+        Separator {
+            visible: popoutWidthAdjustment.visible
+            height: visible ? 1 : 0
+        }
+
+        SliderSettingPlus {
+            id: popoutWidthAdjustment
+            label: I18n.tr("Popout width adjustment")
+            description: I18n.tr("Fine-tune the horizontal popout width.")
+            settingKey: "popoutWidthAdjustment"
+            defaultValue: 0
+            minimum: -150
+            maximum: 150
+            unit: "px"
+            leftLabel: "-150"
+            rightLabel: "150"
+            visible: usePopout.value && popoutLayout.value === "row"
+            height: visible ? implicitHeight : 0
+        }
+
         ToggleSettingPlus {
             id: startExpanded
             label: I18n.tr("Start expanded")

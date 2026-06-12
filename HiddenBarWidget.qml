@@ -32,6 +32,7 @@ PluginComponent {
     readonly property int triggerAdjustment: pluginData.triggerAdjustment ?? 0
     readonly property bool usePopout: pluginData.usePopout ?? false
     readonly property string popoutLayout: pluginData.popoutLayout ?? "row"
+    readonly property int popoutWidthAdjustment: pluginData.popoutWidthAdjustment ?? 0
     onUsePopoutChanged: updateWidgets()
     property var hiddenPluginIds: []
     property bool _popoutVisible: false
@@ -230,7 +231,7 @@ PluginComponent {
     popoutWidth: {
         if (pluginRoot.popoutLayout === "row") {
             if (hiddenPluginIds.length === 0) return 60;
-            return _totalManagedWidth + Theme.spacingM * 2 + _popoutInternalMargin * 2;
+            return Math.max(60, _totalManagedWidth + Theme.spacingM * 2 + _popoutInternalMargin * 2 + pluginRoot.popoutWidthAdjustment);
         }
         return 240;
     }
