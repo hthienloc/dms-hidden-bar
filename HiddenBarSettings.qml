@@ -240,8 +240,8 @@ PluginSettings {
 
         SliderSettingPlus {
             id: triggerAdjustment
-            label: I18n.tr("Trigger area adjustment")
-            description: I18n.tr("Fine-tune the trigger zone size. Positive values expand it, negative values shrink it.")
+            label: I18n.tr("Trigger area width adjustment")
+            description: I18n.tr("Fine-tune the trigger zone width along the bar axis. Positive values expand it, negative values shrink it.")
             settingKey: "triggerAdjustment"
             defaultValue: 0
             minimum: -150
