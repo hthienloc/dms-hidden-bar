@@ -18,9 +18,11 @@ git clone https://github.com/hthienloc/dms-hidden-bar ~/.config/DankMaterialShel
 
 ## Features
 
-- **Smart hide** - Collapse widgets to save bar space
+- **Smart hide** - Collapse widgets to reclaim bar space
 - **Hover to expand** - Reveal hidden widgets by hovering over the trigger area
 - **Auto-collapse** - Hide again after inactivity
+- **Widget control** - Auto, or manually blacklist/whitelist which widgets get hidden
+- **Slide animation** - Widgets slide in and out as the bar collapses (toggleable, adjustable duration)
 - **Exclude items** - Keep system tray or clock always visible
 
 ## Usage
@@ -64,8 +66,8 @@ bind = SUPER, backslash, exec, dms ipc call hiddenBar toggle
 GPL-3.0
 
 ## Roadmap / TODO
-- [ ] **Granular Widget Control:** Settings interface to manually whitelist/blacklist specific widgets for hiding.
-- [ ] **Smooth Animations:** Integrated transition effects (Slide, Fade, or Bounce) when expanding/collapsing the hidden area.
+- [x] **Granular Widget Control:** Settings interface to manually whitelist/blacklist specific widgets for hiding.
+- [x] **Smooth Animations:** Slide transition that reclaims the freed space when expanding/collapsing the hidden area.
 - [x] **Global Keybinding:** IPC commands (`toggle`, `expand`, `collapse`, `pin`, `unpin`) for use with any compositor keybinding system.
 - [ ] **Space-Aware Auto-Hiding:** Automatically hide more widgets as the screen resolution decreases or bar congestion increases.
 - [ ] **Stylized Indicators:** Multiple icon sets and customizable colors for the expansion trigger to match custom themes.
