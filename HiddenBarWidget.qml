@@ -573,39 +573,20 @@ PluginComponent {
             return pluginRoot.isExpanded ? "EXPANDED" : "COLLAPSED";
         }
 
-        function expand() : string {
+        function togglePin() : string {
             if (!pluginRoot.isExpanded) {
                 pluginRoot.isExpanded = true;
+                pluginRoot.isPinned = true;
                 updateWidgets();
+                collapseTimer.stop();
+            } else {
+                pluginRoot.isPinned = !pluginRoot.isPinned;
+                if (!pluginRoot.isPinned && pluginRoot.autoCollapse && !pluginRoot.anyHovered)
+                    collapseTimer.restart();
+                else
+                    collapseTimer.stop();
             }
-            return "EXPANDED";
-        }
-
-        function collapse() : string {
-            if (pluginRoot.isExpanded) {
-                pluginRoot.isExpanded = false;
-                pluginRoot.isPinned = false;
-                updateWidgets();
-            }
-            return "COLLAPSED";
-        }
-
-        function pin() : string {
-            if (!pluginRoot.isExpanded) {
-                pluginRoot.isExpanded = true;
-                updateWidgets();
-            }
-            pluginRoot.isPinned = true;
-            collapseTimer.stop();
-            return "PINNED";
-        }
-
-        function unpin() : string {
-            pluginRoot.isPinned = false;
-            if (pluginRoot.isExpanded && pluginRoot.autoCollapse && !pluginRoot.anyHovered)
-                collapseTimer.restart();
-
-            return "UNPINNED";
+            return pluginRoot.isPinned ? "PINNED" : "UNPINNED";
         }
 
         target: "hiddenBar"

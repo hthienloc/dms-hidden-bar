@@ -42,10 +42,7 @@ Use `dms ipc call hiddenBar <command>` to control the bar from scripts or keybin
 | Command | Description |
 |---------|-------------|
 | `toggle` | Toggle expand/collapse |
-| `expand` | Expand the hidden area |
-| `collapse` | Collapse the hidden area |
-| `pin` | Expand and lock open (disable auto-collapse) |
-| `unpin` | Unlock and resume auto-collapse |
+| `togglePin` | Toggle pin state (prevents auto-collapse) |
 
 ### Keybinding examples
 
@@ -53,12 +50,14 @@ Use `dms ipc call hiddenBar <command>` to control the bar from scripts or keybin
 ```kdl
 bindings {
     Mod+Backslash { spawn "dms" "ipc" "call" "hiddenBar" "toggle"; }
+    Mod+Shift+Backslash { spawn "dms" "ipc" "call" "hiddenBar" "togglePin"; }
 }
 ```
 
 **Hyprland:**
 ```ini
 bind = SUPER, backslash, exec, dms ipc call hiddenBar toggle
+bind = SUPER_SHIFT, backslash, exec, dms ipc call hiddenBar togglePin
 ```
 
 ## License
