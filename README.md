@@ -69,5 +69,3 @@ GPL-3.0
 - [x] **Granular Widget Control:** Settings interface to manually whitelist/blacklist specific widgets for hiding.
 - [x] **Smooth Animations:** Slide transition that reclaims the freed space when expanding/collapsing the hidden area.
 - [x] **Global Keybinding:** IPC commands (`toggle`, `expand`, `collapse`, `pin`, `unpin`) for use with any compositor keybinding system.
-- [ ] **Space-Aware Auto-Hiding:** Automatically hide more widgets as the screen resolution decreases or bar congestion increases.
-- [ ] **Stylized Indicators:** Multiple icon sets and customizable colors for the expansion trigger to match custom themes.
