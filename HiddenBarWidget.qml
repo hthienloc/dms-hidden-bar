@@ -172,7 +172,7 @@ PluginComponent {
             // bottom (pill) edge. Left/center reveal from the top edge.
             if (pluginRoot.section === "right")
                 loader.y = Qt.binding(function() {
-                    return slot.height - (loader.height || 0);
+                    return slot.height - (loader.height || loader.implicitHeight || 0);
                 });
             else
                 loader.y = 0;
@@ -184,7 +184,7 @@ PluginComponent {
             // (pill) edge. Left/center reveal from the left edge.
             if (pluginRoot.section === "right")
                 loader.x = Qt.binding(function() {
-                    return slot.width - (loader.width || 0);
+                    return slot.width - (loader.width || loader.implicitWidth || 0);
                 });
             else
                 loader.x = 0;

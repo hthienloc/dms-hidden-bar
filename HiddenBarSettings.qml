@@ -447,28 +447,14 @@ PluginSettings {
                 return s.charAt(0).toUpperCase() + s.slice(1);
             }
 
-            // Walk up to the PluginSettings root that exposes saveValue/loadValue.
-            function findSettings() {
-                let item = parent;
-                while (item) {
-                    if (item.saveValue !== undefined && item.loadValue !== undefined)
-                        return item;
-                    item = item.parent;
-                }
-                return null;
-            }
-
             // Named loadValue() so SettingsCard.loadValue() picks it up on reload.
+            // root is the PluginSettings (id: root) and exposes saveValue/loadValue.
             function loadValue() {
-                const settings = findSettings();
-                if (settings)
-                    selectedIds = (settings.loadValue(settingKey, []) || []).slice();
+                selectedIds = (root.loadValue(settingKey, []) || []).slice();
             }
 
             function persist() {
-                const settings = findSettings();
-                if (settings)
-                    settings.saveValue(settingKey, selectedIds);
+                root.saveValue(settingKey, selectedIds);
             }
 
             function isSelected(id) {
@@ -488,19 +474,18 @@ PluginSettings {
 
             function clearAll() {
                 selectedIds = [];
-                const settings = findSettings();
-                if (settings) {
-                    settings.saveValue("widgetBlacklist", []);
-                    settings.saveValue("widgetWhitelist", []);
-                }
+                root.saveValue("widgetBlacklist", []);
+                root.saveValue("widgetWhitelist", []);
             }
 
             function buildModel() {
                 const ids = BarWidgetService.getRegisteredWidgetIds ? BarWidgetService.getRegisteredWidgetIds() : [];
                 const variants = (PluginService && PluginService.getAllPluginVariants) ? PluginService.getAllPluginVariants() : [];
                 let variantMap = ({});
-                for (let v = 0; v < variants.length; v++)
-                    variantMap[variants[v].fullId] = variants[v];
+                for (let v = 0; v < variants.length; v++) {
+                    if (variants[v] && variants[v].fullId)
+                        variantMap[variants[v].fullId] = variants[v];
+                }
                 let out = [];
                 for (let i = 0; i < ids.length; i++) {
                     let id = ids[i];
@@ -512,7 +497,7 @@ PluginSettings {
                         name = def.text;
                         icon = def.icon;
                     } else if (variantMap[id]) {
-                        name = variantMap[id].name;
+                        name = variantMap[id].name || prettify(id);
                         icon = variantMap[id].icon || "extension";
                     } else {
                         name = prettify(id);

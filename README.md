@@ -21,7 +21,7 @@ git clone https://github.com/hthienloc/dms-hidden-bar ~/.config/DankMaterialShel
 - **Smart hide** - Collapse widgets to reclaim bar space
 - **Hover to expand** - Reveal hidden widgets by hovering over the trigger area
 - **Auto-collapse** - Hide again after inactivity
-- **Widget control** - Auto, or manually blacklist/whitelist which widgets get hidden
+- **Widget control** - Automatically or manually blacklist/whitelist which widgets get hidden
 - **Slide animation** - Widgets slide in and out as the bar collapses (toggleable, adjustable duration)
 - **Exclude items** - Keep system tray or clock always visible
 
