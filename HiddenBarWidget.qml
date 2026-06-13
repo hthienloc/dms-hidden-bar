@@ -166,25 +166,25 @@ PluginComponent {
         loader.visible = true;
         if (pluginRoot.isVertical) {
             slot.height = Qt.binding(function() {
-                return loader.item ? Math.round((loader.item.height || loader.item.implicitHeight || 0) * pluginRoot.collapseProgress) : 0;
+                return loader.item ? Math.round((loader.item.implicitHeight || loader.item.height || 0) * pluginRoot.collapseProgress) : 0;
             });
             // Vertical right section: widgets sit above the pill, so reveal from the
             // bottom (pill) edge. Left/center reveal from the top edge.
             if (pluginRoot.section === "right")
                 loader.y = Qt.binding(function() {
-                    return slot.height - (loader.height || loader.implicitHeight || 0);
+                    return slot.height - (loader.implicitHeight || loader.height || 0);
                 });
             else
                 loader.y = 0;
         } else {
             slot.width = Qt.binding(function() {
-                return loader.item ? Math.round((loader.item.width || loader.item.implicitWidth || 0) * pluginRoot.collapseProgress) : 0;
+                return loader.item ? Math.round((loader.item.implicitWidth || loader.item.width || 0) * pluginRoot.collapseProgress) : 0;
             });
             // Right section: widgets sit left of the pill, so reveal from the right
             // (pill) edge. Left/center reveal from the left edge.
             if (pluginRoot.section === "right")
                 loader.x = Qt.binding(function() {
-                    return slot.width - (loader.width || loader.implicitWidth || 0);
+                    return slot.width - (loader.implicitWidth || loader.width || 0);
                 });
             else
                 loader.x = 0;
@@ -210,11 +210,11 @@ PluginComponent {
         }
         if (pluginRoot.isVertical)
             slot.height = Qt.binding(function() {
-                return (loader && loader.item) ? (loader.item.height || loader.item.implicitHeight || 0) : 0;
+                return (loader && loader.item) ? (loader.item.implicitHeight || loader.item.height || 0) : 0;
             });
         else
             slot.width = Qt.binding(function() {
-                return (loader && loader.item) ? (loader.item.width || loader.item.implicitWidth || 0) : 0;
+                return (loader && loader.item) ? (loader.item.implicitWidth || loader.item.width || 0) : 0;
             });
     }
 
@@ -289,9 +289,7 @@ PluginComponent {
             let slot = c.widget.parent ? c.widget.parent.parent : null;
             let shouldBeHidden = newHiddenIds.indexOf(c.id) !== -1;
             if (shouldBeHidden) {
-                // Measure the widget's natural size from the item (the slot is
-                // animated), caching it so popout sizing survives the collapse.
-                let currentSize = pluginRoot.isVertical ? (c.widget.height || c.widget.implicitHeight || 0) : (c.widget.width || c.widget.implicitWidth || 0);
+                let currentSize = pluginRoot.isVertical ? (c.widget.implicitHeight || c.widget.height || 0) : (c.widget.implicitWidth || c.widget.width || 0);
                 if (currentSize > 0)
                     pluginRoot._sizeCache[c.id] = currentSize;
 
@@ -616,7 +614,7 @@ PluginComponent {
     MouseArea {
         id: triggerZone
 
-        readonly property real baseExpansion: pluginRoot.extendedTrigger ? Math.max(pluginRoot.hiddenAreaSize, 200) : 0
+        readonly property real baseExpansion: pluginRoot.extendedTrigger ? Math.max(pluginRoot.hiddenAreaSize, 260) : 0
         readonly property real expansion: Math.max(0, baseExpansion + pluginRoot.triggerAdjustment)
 
         hoverEnabled: true
