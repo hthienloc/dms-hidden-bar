@@ -28,6 +28,13 @@ PluginComponent {
     readonly property int spacing: Theme.spacingS
     readonly property bool extendedTrigger: pluginData.extendedTrigger ?? true
     readonly property int hideCount: pluginData.hideCount ?? 0
+    // Granular widget control: "auto" hides everything eligible (respecting the
+    // tray/clock toggles and hideCount), "blacklist" hides everything except the
+    // listed widgets, "whitelist" hides only the listed widgets. IDs match the
+    // BarWidgetService registry (== bar config / plugin fullId).
+    readonly property string widgetSelectionMode: pluginData.widgetSelectionMode ?? "auto"
+    readonly property var widgetBlacklist: pluginData.widgetBlacklist ?? []
+    readonly property var widgetWhitelist: pluginData.widgetWhitelist ?? []
     readonly property bool showRegionPreview: pluginData.showRegionPreview ?? false
     readonly property int triggerAdjustment: pluginData.triggerAdjustment ?? 0
     readonly property int triggerOffset: pluginData.triggerOffset ?? 0
@@ -38,10 +45,25 @@ PluginComponent {
     readonly property int popoutWidthAdjustment: pluginData.popoutWidthAdjustment ?? 48
     readonly property int popoutHeightAdjustment: pluginData.popoutHeightAdjustment ?? 6
     onUsePopoutChanged: updateWidgets()
+    onWidgetSelectionModeChanged: updateWidgets()
+    onWidgetBlacklistChanged: updateWidgets()
+    onWidgetWhitelistChanged: updateWidgets()
     property var hiddenPluginIds: []
     property bool _popoutVisible: false
     property bool _popoutHovered: false
     property real hiddenAreaSize: 0
+
+    // Collapse/expand animation. collapseProgress drives the managed widgets'
+    // layout slot size: 0 = fully collapsed (space reclaimed), 1 = fully shown.
+    // It tracks the expand state so toggling animates via the Behavior below.
+    readonly property bool animateCollapse: pluginData.animateCollapse ?? true
+    readonly property int animDuration: pluginData.animDuration ?? 220
+    property real collapseProgress: pluginRoot.usePopout ? 0 : (pluginRoot.isExpanded ? 1 : 0)
+    // Slots we currently override, as {slot, item} pairs, so they can be restored.
+    property var _managedSlots: []
+    // Last known reliable position per widget id, so selection stays stable while
+    // managed slots are collapsed (their live x/y is unreliable when reclaimed).
+    property var _posCache: ({})
 
     readonly property int _popoutInternalMargin: Theme.spacingS // From PluginPopout.qml
     readonly property real _totalManagedWidth: {
@@ -104,6 +126,98 @@ PluginComponent {
         }
     }
 
+    // Whether a widget id may be hidden under the current selection mode.
+    // "auto" allows everything; the tray/clock quick-toggles are handled
+    // separately (auto mode only) so they don't fight the explicit lists.
+    function _isHideAllowed(id) {
+        if (pluginRoot.widgetSelectionMode === "blacklist")
+            return pluginRoot.widgetBlacklist.indexOf(id) === -1;
+        if (pluginRoot.widgetSelectionMode === "whitelist")
+            return pluginRoot.widgetWhitelist.indexOf(id) !== -1;
+        return true;
+    }
+
+    // Position of a widget's layout slot, cached while reliable. A managed slot
+    // collapses to ~0 and turns invisible, so its live x/y can't be trusted then;
+    // we fall back to the last position captured while it was at full size.
+    function _resolvePos(id, slot) {
+        let live = pluginRoot.isVertical ? slot.y : slot.x;
+        let sz = pluginRoot.isVertical ? slot.height : slot.width;
+        if (slot.visible && sz > 1) {
+            pluginRoot._posCache[id] = live;
+            return live;
+        }
+        return (id in pluginRoot._posCache) ? pluginRoot._posCache[id] : live;
+    }
+
+    // Override a widget's layout slot so its size follows collapseProgress and it
+    // reveals from the pill side. clip hides the overflow while the slot shrinks.
+    // All size bindings read the WidgetHost Loader's LIVE item (loader.item),
+    // mirroring DMS' own `widgetLoader.item ? widgetLoader.item.width : 0` — so a
+    // widget whose Loader reactivates (music player on/off, dgop toggle) tracks the
+    // fresh item instead of clinging to a captured, now-destroyed reference.
+    function _applyManaged(slot, item) {
+        if (!slot || !item)
+            return ;
+        let loader = item.parent; // the WidgetHost Loader hosting this widget
+        if (!loader)
+            return ;
+        slot.clip = true;
+        loader.visible = true;
+        if (pluginRoot.isVertical) {
+            slot.height = Qt.binding(function() {
+                return loader.item ? Math.round((loader.item.height || loader.item.implicitHeight || 0) * pluginRoot.collapseProgress) : 0;
+            });
+            // Vertical right section: widgets sit above the pill, so reveal from the
+            // bottom (pill) edge. Left/center reveal from the top edge.
+            if (pluginRoot.section === "right")
+                loader.y = Qt.binding(function() {
+                    return slot.height - (loader.height || 0);
+                });
+            else
+                loader.y = 0;
+        } else {
+            slot.width = Qt.binding(function() {
+                return loader.item ? Math.round((loader.item.width || loader.item.implicitWidth || 0) * pluginRoot.collapseProgress) : 0;
+            });
+            // Right section: widgets sit left of the pill, so reveal from the right
+            // (pill) edge. Left/center reveal from the left edge.
+            if (pluginRoot.section === "right")
+                loader.x = Qt.binding(function() {
+                    return slot.width - (loader.width || 0);
+                });
+            else
+                loader.x = 0;
+        }
+        slot.visible = Qt.binding(function() {
+            return pluginRoot.collapseProgress > 0.001;
+        });
+    }
+
+    // Hand a slot back to its default DMS layout (full size, visible, no clip).
+    // Re-bind to the live loader.item, matching DMS' own delegate binding, so the
+    // slot keeps tracking the widget across Loader reloads after we let go of it.
+    function _restoreSlot(slot, item) {
+        if (!slot)
+            return ;
+        slot.clip = false;
+        slot.visible = true;
+        let loader = item ? item.parent : null;
+        if (loader) {
+            loader.visible = true;
+            loader.x = 0;
+            loader.y = 0;
+        }
+        if (pluginRoot.isVertical)
+            slot.height = Qt.binding(function() {
+                return (loader && loader.item) ? (loader.item.height || loader.item.implicitHeight || 0) : 0;
+            });
+        else
+            slot.width = Qt.binding(function() {
+                return (loader && loader.item) ? (loader.item.width || loader.item.implicitWidth || 0) : 0;
+            });
+    }
+
     function updateWidgets() {
         if (!pluginRoot.parentScreen)
             return ;
@@ -121,15 +235,20 @@ PluginComponent {
             if (id === pluginRoot.pluginId)
                 continue;
 
-            if (pluginRoot.excludeTray && (id === "systray" || id.includes("tray")))
-                continue;
+            // Tray/clock quick-toggles only apply in auto mode; in
+            // blacklist/whitelist the explicit lists are the source of truth.
+            if (pluginRoot.widgetSelectionMode === "auto") {
+                if (pluginRoot.excludeTray && (id === "systray" || id.includes("tray")))
+                    continue;
 
-            if (pluginRoot.excludeClock && (id === "clock" || id === "time"))
-                continue;
+                if (pluginRoot.excludeClock && (id === "clock" || id === "time"))
+                    continue;
+
+            }
 
             let widget = BarWidgetService.getWidget(id, myScreen);
             if (widget && widget.section === mySection && widget.parent && widget.parent.parent) {
-                let widgetPos = pluginRoot.isVertical ? widget.parent.parent.y : widget.parent.parent.x;
+                let widgetPos = pluginRoot._resolvePos(id, widget.parent.parent);
                 let shouldManage = false;
                 if (mySection === "right")
                     shouldManage = (widgetPos < myPos);
@@ -150,8 +269,12 @@ PluginComponent {
         candidates.sort((a, b) => {
             return a.dist - b.dist;
         });
-        let limit = (pluginRoot.hideCount > 0) ? pluginRoot.hideCount : candidates.length;
-        let hiddenCandidates = candidates.slice(0, limit);
+        // Only widgets allowed by the current selection mode can be hidden.
+        // Non-eligible candidates stay in `candidates` so the visibility loop
+        // below restores them to visible (handles toggling a widget back on).
+        let eligible = candidates.filter(c => pluginRoot._isHideAllowed(c.id));
+        let limit = (pluginRoot.hideCount > 0) ? pluginRoot.hideCount : eligible.length;
+        let hiddenCandidates = eligible.slice(0, limit);
         hiddenCandidates.sort((a, b) => {
             return a.pos - b.pos;
         });
@@ -160,20 +283,15 @@ PluginComponent {
             newHiddenIds.push(hiddenCandidates[k].id);
         }
         let totalSize = 0;
+        let newManaged = [];
         for (let j = 0; j < candidates.length; j++) {
             let c = candidates[j];
+            let slot = c.widget.parent ? c.widget.parent.parent : null;
             let shouldBeHidden = newHiddenIds.indexOf(c.id) !== -1;
             if (shouldBeHidden) {
-                if (pluginRoot.usePopout) {
-                    if (c.widget.parent)
-                        c.widget.parent.visible = false;
-                } else {
-                    if (c.widget.parent)
-                        c.widget.parent.visible = pluginRoot.isExpanded;
-                }
-
-                // Get size, using cache if current size is 0 (hidden)
-                let currentSize = pluginRoot.isVertical ? (c.widget.height || c.widget.implicitHeight || (c.widget.parent && c.widget.parent.parent ? c.widget.parent.parent.height : 0)) : (c.widget.width || c.widget.implicitWidth || (c.widget.parent && c.widget.parent.parent ? c.widget.parent.parent.width : 0));
+                // Measure the widget's natural size from the item (the slot is
+                // animated), caching it so popout sizing survives the collapse.
+                let currentSize = pluginRoot.isVertical ? (c.widget.height || c.widget.implicitHeight || 0) : (c.widget.width || c.widget.implicitWidth || 0);
                 if (currentSize > 0)
                     pluginRoot._sizeCache[c.id] = currentSize;
 
@@ -181,12 +299,33 @@ PluginComponent {
                 if (size > 0)
                     totalSize += size;
 
-            } else {
-                if (c.widget.parent)
-                    c.widget.parent.visible = true;
-
+                if (slot) {
+                    pluginRoot._applyManaged(slot, c.widget);
+                    newManaged.push({
+                        "slot": slot,
+                        "item": c.widget
+                    });
+                }
+            } else if (slot) {
+                pluginRoot._restoreSlot(slot, c.widget);
             }
         }
+
+        // Restore slots that were managed last time but no longer are.
+        let oldManaged = pluginRoot._managedSlots;
+        for (let m = 0; m < oldManaged.length; m++) {
+            let pair = oldManaged[m];
+            let stillManaged = false;
+            for (let n = 0; n < newManaged.length; n++) {
+                if (newManaged[n].slot === pair.slot) {
+                    stillManaged = true;
+                    break;
+                }
+            }
+            if (!stillManaged)
+                pluginRoot._restoreSlot(pair.slot, pair.item);
+        }
+        pluginRoot._managedSlots = newManaged;
         pluginRoot.hiddenPluginIds = newHiddenIds;
 
         // Cleanup cache for unregistered widgets
@@ -215,6 +354,14 @@ PluginComponent {
                 child.popoutClosed.connect(child.primeContent);
             }
         }
+    }
+    Component.onDestruction: {
+        // Hand every overridden slot back to its default DMS layout so we never
+        // leave a foreign widget bound to this (now destroyed) component.
+        for (let i = 0; i < pluginRoot._managedSlots.length; i++) {
+            pluginRoot._restoreSlot(pluginRoot._managedSlots[i].slot, pluginRoot._managedSlots[i].item);
+        }
+        pluginRoot._managedSlots = [];
     }
     onIsMouseInGlobalZoneChanged: {
         updateAnyHovered();
@@ -337,6 +484,14 @@ PluginComponent {
                     }
                 }
             }
+        }
+    }
+
+    Behavior on collapseProgress {
+        enabled: pluginRoot.animateCollapse && !pluginRoot.usePopout
+        NumberAnimation {
+            duration: pluginRoot.animDuration
+            easing.type: Easing.OutCubic
         }
     }
 
