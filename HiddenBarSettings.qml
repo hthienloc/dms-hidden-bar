@@ -21,7 +21,7 @@ PluginSettings {
         SectionTitle { 
             text: I18n.tr("Expansion & Collapse")
             icon: "unfold_more" 
-            showReset: usePopout.isDirty || popoutLayout.isDirty || startExpanded.isDirty || autoExpand.isDirty || hoverDelay.isDirty || autoCollapse.isDirty || collapseDelay.isDirty
+            showReset: usePopout.isDirty || popoutLayout.isDirty || startExpanded.isDirty || autoExpand.isDirty || hoverDelay.isDirty || autoCollapse.isDirty || collapseDelay.isDirty || animateCollapse.isDirty || animDuration.isDirty
             onResetClicked: {
                 usePopout.resetToDefault();
                 popoutLayout.resetToDefault();
@@ -30,6 +30,8 @@ PluginSettings {
                 hoverDelay.resetToDefault();
                 autoCollapse.resetToDefault();
                 collapseDelay.resetToDefault();
+                animateCollapse.resetToDefault();
+                animDuration.resetToDefault();
             }
         }
 
@@ -178,6 +180,31 @@ PluginSettings {
             height: visible ? implicitHeight : 0
         }
 
+        Separator {}
+
+        ToggleSettingPlus {
+            id: animateCollapse
+            label: I18n.tr("Animate collapse")
+            description: I18n.tr("Slide widgets in and out instead of switching instantly. When off, the space is reclaimed immediately.")
+            settingKey: "animateCollapse"
+            defaultValue: true
+        }
+
+        SliderSettingPlus {
+            id: animDuration
+            label: I18n.tr("Animation duration")
+            description: I18n.tr("How long the slide animation takes.")
+            settingKey: "animDuration"
+            defaultValue: 220
+            minimum: 80
+            maximum: 600
+            unit: "ms"
+            leftLabel: "80"
+            rightLabel: "600"
+            visible: animateCollapse.value
+            height: visible ? implicitHeight : 0
+        }
+
         Separator {
             visible: autoCollapse.value
             height: visible ? 1 : 0
@@ -299,15 +326,35 @@ PluginSettings {
 
     SettingsCard {
         id: exclusionsSection
-        SectionTitle { 
-            text: I18n.tr("Exclusions")
-            icon: "block" 
-            showReset: excludeTray.isDirty || excludeClock.isDirty || hideCount.isDirty
+        SectionTitle {
+            text: I18n.tr("Widget Control")
+            icon: "tune"
+            showReset: widgetSelectionMode.isDirty || excludeTray.isDirty || excludeClock.isDirty || hideCount.isDirty || (widgetList.hasSelection && widgetList.visible)
             onResetClicked: {
+                widgetSelectionMode.resetToDefault();
                 excludeTray.resetToDefault();
                 excludeClock.resetToDefault();
                 hideCount.resetToDefault();
+                widgetList.clearAll();
             }
+        }
+
+        SelectionSettingPlus {
+            id: widgetSelectionMode
+            label: I18n.tr("Widget selection")
+            description: I18n.tr("Auto hides every eligible widget. Blacklist hides all except the widgets you pick. Whitelist hides only the widgets you pick.")
+            settingKey: "widgetSelectionMode"
+            defaultValue: "auto"
+            options: [
+                { label: I18n.tr("Auto"), value: "auto" },
+                { label: I18n.tr("Blacklist"), value: "blacklist" },
+                { label: I18n.tr("Whitelist"), value: "whitelist" }
+            ]
+        }
+
+        Separator {
+            visible: excludeTray.visible || widgetList.visible
+            height: visible ? 1 : 0
         }
 
         ToggleSettingPlus {
@@ -316,9 +363,14 @@ PluginSettings {
             description: I18n.tr("Never hide the system tray widgets.")
             settingKey: "excludeTray"
             defaultValue: true
+            visible: widgetSelectionMode.value === "auto"
+            height: visible ? implicitHeight : 0
         }
 
-        Separator {}
+        Separator {
+            visible: excludeTray.visible
+            height: visible ? 1 : 0
+        }
 
         ToggleSettingPlus {
             id: excludeClock
@@ -326,9 +378,214 @@ PluginSettings {
             description: I18n.tr("Never hide the clock widget.")
             settingKey: "excludeClock"
             defaultValue: true
+            visible: widgetSelectionMode.value === "auto"
+            height: visible ? implicitHeight : 0
         }
 
-        Separator {}
+        // Granular widget control: an explicit blacklist/whitelist of bar
+        // widgets. The list is sourced from BarWidgetService so the IDs match
+        // exactly what the widget filters on at runtime. Persists an array of
+        // widget IDs per mode via the PluginSettings root (saveValue/loadValue).
+        Column {
+            id: widgetList
+
+            width: parent.width
+            visible: widgetSelectionMode.value !== "auto"
+            height: visible ? implicitHeight : 0
+            spacing: Theme.spacingS
+            topPadding: visible ? Theme.spacingS : 0
+
+            readonly property string settingKey: widgetSelectionMode.value === "whitelist" ? "widgetWhitelist" : "widgetBlacklist"
+            property var selectedIds: []
+            property var widgetModel: []
+            readonly property bool hasSelection: selectedIds.length > 0
+
+            // Mirrors DMS' baseWidgetDefinitions.coreWidgets in
+            // Modules/Settings/WidgetsTab.qml so built-in widgets show the same
+            // name/icon as the bar settings. Keep in sync on DMS updates: new or
+            // renamed built-ins missing here fall back to prettify(id) + the
+            // generic "widgets" icon (see buildModel's else branch). There is no
+            // upstream catalog singleton — BarWidgetService exposes IDs only.
+            readonly property var builtinCatalog: ({
+                "layout": { text: I18n.tr("Layout"), icon: "view_quilt" },
+                "launcherButton": { text: I18n.tr("App Launcher"), icon: "apps" },
+                "workspaceSwitcher": { text: I18n.tr("Workspace Switcher"), icon: "view_module" },
+                "focusedWindow": { text: I18n.tr("Focused Window"), icon: "window" },
+                "runningApps": { text: I18n.tr("Running Apps"), icon: "apps" },
+                "appsDock": { text: I18n.tr("Apps Dock"), icon: "dock_to_bottom" },
+                "clock": { text: I18n.tr("Clock"), icon: "schedule" },
+                "weather": { text: I18n.tr("Weather Widget"), icon: "wb_sunny" },
+                "music": { text: I18n.tr("Media Controls"), icon: "music_note" },
+                "clipboard": { text: I18n.tr("Clipboard Manager"), icon: "content_paste" },
+                "cpuUsage": { text: I18n.tr("CPU Usage"), icon: "memory" },
+                "memUsage": { text: I18n.tr("Memory Usage"), icon: "developer_board" },
+                "diskUsage": { text: I18n.tr("Disk Usage"), icon: "storage" },
+                "cpuTemp": { text: I18n.tr("CPU Temperature"), icon: "device_thermostat" },
+                "gpuTemp": { text: I18n.tr("GPU Temperature"), icon: "auto_awesome_mosaic" },
+                "systemTray": { text: I18n.tr("System Tray"), icon: "notifications" },
+                "privacyIndicator": { text: I18n.tr("Privacy Indicator"), icon: "privacy_tip" },
+                "controlCenterButton": { text: I18n.tr("Control Center"), icon: "settings" },
+                "notificationButton": { text: I18n.tr("Notification Center"), icon: "notifications" },
+                "battery": { text: I18n.tr("Battery"), icon: "battery_std" },
+                "vpn": { text: I18n.tr("VPN"), icon: "vpn_lock" },
+                "idleInhibitor": { text: I18n.tr("Idle Inhibitor"), icon: "motion_sensor_active" },
+                "capsLockIndicator": { text: I18n.tr("Caps Lock Indicator"), icon: "shift_lock" },
+                "spacer": { text: I18n.tr("Spacer"), icon: "more_horiz" },
+                "separator": { text: I18n.tr("Separator"), icon: "remove" },
+                "network_speed_monitor": { text: I18n.tr("Network Speed Monitor"), icon: "network_check" },
+                "keyboard_layout_name": { text: I18n.tr("Keyboard Layout Name"), icon: "keyboard" },
+                "notepadButton": { text: I18n.tr("Notepad"), icon: "assignment" },
+                "colorPicker": { text: I18n.tr("Color Picker"), icon: "palette" },
+                "systemUpdate": { text: I18n.tr("System Update"), icon: "update" },
+                "powerMenuButton": { text: I18n.tr("Power"), icon: "power_settings_new" }
+            })
+
+            // Turn an unknown widget id into a readable label, e.g.
+            // "network_speed_monitor" -> "Network Speed Monitor".
+            function prettify(id) {
+                let s = String(id).replace(/[:_]/g, " ").replace(/([a-z0-9])([A-Z])/g, "$1 $2");
+                return s.charAt(0).toUpperCase() + s.slice(1);
+            }
+
+            // Named loadValue() so SettingsCard.loadValue() picks it up on reload.
+            // root is the PluginSettings (id: root) and exposes saveValue/loadValue.
+            function loadValue() {
+                selectedIds = (root.loadValue(settingKey, []) || []).slice();
+            }
+
+            function persist() {
+                root.saveValue(settingKey, selectedIds);
+            }
+
+            function isSelected(id) {
+                return selectedIds.indexOf(id) !== -1;
+            }
+
+            function setSelected(id, on) {
+                let arr = selectedIds.slice();
+                let i = arr.indexOf(id);
+                if (on && i === -1)
+                    arr.push(id);
+                else if (!on && i !== -1)
+                    arr.splice(i, 1);
+                selectedIds = arr;
+                persist();
+            }
+
+            function clearAll() {
+                selectedIds = [];
+                root.saveValue("widgetBlacklist", []);
+                root.saveValue("widgetWhitelist", []);
+            }
+
+            function buildModel() {
+                const ids = BarWidgetService.getRegisteredWidgetIds ? BarWidgetService.getRegisteredWidgetIds() : [];
+                const variants = (PluginService && PluginService.getAllPluginVariants) ? PluginService.getAllPluginVariants() : [];
+                let variantMap = ({});
+                for (let v = 0; v < variants.length; v++) {
+                    if (variants[v] && variants[v].fullId)
+                        variantMap[variants[v].fullId] = variants[v];
+                }
+                let out = [];
+                for (let i = 0; i < ids.length; i++) {
+                    let id = ids[i];
+                    if (id === root.pluginId || id.indexOf(root.pluginId + ":") === 0)
+                        continue;
+                    let def = builtinCatalog[id];
+                    let name, icon;
+                    if (def) {
+                        name = def.text;
+                        icon = def.icon;
+                    } else if (variantMap[id]) {
+                        name = variantMap[id].name || prettify(id);
+                        icon = variantMap[id].icon || "extension";
+                    } else {
+                        name = prettify(id);
+                        icon = "widgets";
+                    }
+                    out.push({ "id": id, "name": name, "icon": icon });
+                }
+                out.sort((a, b) => a.name.localeCompare(b.name));
+                widgetModel = out;
+            }
+
+            onSettingKeyChanged: loadValue()
+            Component.onCompleted: {
+                buildModel();
+                Qt.callLater(loadValue);
+            }
+
+            Connections {
+                target: BarWidgetService
+                function onWidgetRegistered(id, screen) { widgetList.buildModel(); }
+                function onWidgetUnregistered(id, screen) { widgetList.buildModel(); }
+            }
+
+            StyledText {
+                width: parent.width
+                text: widgetSelectionMode.value === "whitelist" ? I18n.tr("Only hide these widgets:") : I18n.tr("Never hide these widgets:")
+                font.pixelSize: Theme.fontSizeMedium
+                font.weight: Font.Medium
+                color: Theme.surfaceText
+                wrapMode: Text.WordWrap
+            }
+
+            Repeater {
+                model: widgetList.widgetModel
+                delegate: Item {
+                    width: widgetList.width
+                    height: 40
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: widgetList.setSelected(modelData.id, !widgetList.isSelected(modelData.id))
+                    }
+
+                    DankIcon {
+                        id: rowIcon
+                        anchors.left: parent.left
+                        anchors.verticalCenter: parent.verticalCenter
+                        name: modelData.icon
+                        size: Theme.iconSizeSmall
+                        color: Theme.surfaceText
+                    }
+
+                    DankToggle {
+                        id: rowToggle
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        checked: widgetList.isSelected(modelData.id)
+                        onToggled: isChecked => widgetList.setSelected(modelData.id, isChecked)
+                    }
+
+                    StyledText {
+                        anchors.left: rowIcon.right
+                        anchors.leftMargin: Theme.spacingM
+                        anchors.right: rowToggle.left
+                        anchors.rightMargin: Theme.spacingM
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: modelData.name
+                        font.pixelSize: Theme.fontSizeMedium
+                        color: Theme.surfaceText
+                        elide: Text.ElideRight
+                    }
+                }
+            }
+
+            StyledText {
+                width: parent.width
+                visible: widgetList.widgetModel.length === 0
+                text: I18n.tr("No manageable widgets detected yet. Add widgets to the bar, then run 'dms restart'.")
+                color: Theme.surfaceVariantText
+                font.pixelSize: Theme.fontSizeSmall
+                wrapMode: Text.WordWrap
+            }
+        }
+
+        Separator {
+            height: 1
+        }
 
         SliderSettingPlus {
             id: hideCount
