@@ -723,8 +723,16 @@ PluginComponent {
                     if (pluginRoot.isPinned)
                         return "push_pin";
 
-                    if (pluginRoot.usePopout)
+                    if (pluginRoot.usePopout) {
+                        if (pluginRoot.isVertical) {
+                            const edge = axis?.edge ?? "";
+                            if (edge === "left")
+                                return pluginRoot._popoutVisible ? "chevron_right" : "chevron_left";
+                            if (edge === "right")
+                                return pluginRoot._popoutVisible ? "chevron_left" : "chevron_right";
+                        }
                         return "expand_less";
+                    }
 
                     if (pluginRoot.section === "right")
                         return pluginRoot.isExpanded ? "chevron_left" : "chevron_right";
@@ -732,7 +740,7 @@ PluginComponent {
                         return pluginRoot.isExpanded ? "chevron_right" : "chevron_left";
                     return pluginRoot.isExpanded ? "view-conceal-symbolic" : "view-visible-symbolic";
                 }
-                rotation: (pluginRoot.usePopout && pluginRoot._popoutVisible) ? 180 : 0
+                rotation: (pluginRoot.usePopout && pluginRoot._popoutVisible && !pluginRoot.isVertical) ? 180 : 0
                 color: Theme.surfaceText
             }
 
