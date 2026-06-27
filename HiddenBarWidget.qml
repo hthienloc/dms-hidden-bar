@@ -391,20 +391,19 @@ PluginComponent {
             headerText: ""
             showCloseButton: false
             
-            Component.onCompleted: {
-                if (parentPopout) {
-                    pluginRoot._popoutVisible = Qt.binding(() => parentPopout.shouldBeVisible);
-                    parentPopout.shouldBeVisibleChanged.connect(() => {
-                        if (!parentPopout.shouldBeVisible)
-                            pluginRoot._popoutHovered = false;
-                    });
-                } else {
-                    pluginRoot._popoutVisible = true;
-                }
-            }
+            Component.onCompleted: pluginRoot._popoutVisible = true
             Component.onDestruction: {
                 pluginRoot._popoutVisible = false;
                 pluginRoot._popoutHovered = false;
+            }
+
+            Connections {
+                target: parentPopout
+                function onShouldBeVisibleChanged() {
+                    pluginRoot._popoutVisible = parentPopout.shouldBeVisible;
+                    if (!parentPopout.shouldBeVisible)
+                        pluginRoot._popoutHovered = false;
+                }
             }
 
             MouseArea {
