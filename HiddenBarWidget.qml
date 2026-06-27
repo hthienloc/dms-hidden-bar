@@ -393,8 +393,17 @@ PluginComponent {
             
             Component.onCompleted: pluginRoot._popoutVisible = true
             Component.onDestruction: {
-                pluginRoot._popoutVisible = false
-                pluginRoot._popoutHovered = false
+                pluginRoot._popoutVisible = false;
+                pluginRoot._popoutHovered = false;
+            }
+
+            Connections {
+                target: parentPopout
+                function onShouldBeVisibleChanged() {
+                    pluginRoot._popoutVisible = parentPopout.shouldBeVisible;
+                    if (!parentPopout.shouldBeVisible)
+                        pluginRoot._popoutHovered = false;
+                }
             }
 
             MouseArea {
