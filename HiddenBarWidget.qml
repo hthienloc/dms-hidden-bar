@@ -483,7 +483,7 @@ PluginComponent {
 
                     MouseArea {
                         anchors.fill: parent
-                        z: -1
+                        z: 10
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         acceptedButtons: Qt.LeftButton | Qt.RightButton
