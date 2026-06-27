@@ -512,6 +512,15 @@ PluginComponent {
                                 BarWidgetService.triggerWidgetPopout(modelData);
                         }
                     }
+
+                    DropArea {
+                        anchors.fill: parent
+                        z: 11
+                        onEntered: drag => {
+                            pluginRoot.closePopout();
+                            BarWidgetService.triggerWidgetPopout(modelData);
+                        }
+                    }
                 }
             }
         }
