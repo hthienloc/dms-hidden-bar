@@ -480,6 +480,29 @@ PluginComponent {
                             }
                         }
                     }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        z: -1
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+                        onContainsMouseChanged: pluginRoot._popoutHovered = containsMouse
+                        onClicked: mouse => {
+                            const w = delegateRoot.originalWidget;
+                            if (mouse.button === Qt.RightButton) {
+                                if (w && typeof w.pillRightClickAction === "function")
+                                    w.pillRightClickAction();
+                                else
+                                    BarWidgetService.triggerWidgetPopout(modelData);
+                                return;
+                            }
+                            if (w && typeof w.triggerPopout === "function")
+                                w.triggerPopout();
+                            else
+                                BarWidgetService.triggerWidgetPopout(modelData);
+                        }
+                    }
                 }
             }
         }
