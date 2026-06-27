@@ -725,7 +725,7 @@ PluginComponent {
 
                     if (pluginRoot.usePopout) {
                         if (pluginRoot.isVertical) {
-                            const edge = pluginRoot.axis?.edge ?? "";
+                            const edge = axis?.edge ?? "";
                             if (edge === "left")
                                 return pluginRoot._popoutVisible ? "chevron_right" : "chevron_left";
                             if (edge === "right")
